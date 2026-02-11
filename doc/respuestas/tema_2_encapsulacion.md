@@ -4,15 +4,35 @@
 
 ### Respuesta
 
+En POO, la encapsulación busca agrupar en una misma unidad (la clase) los datos (atributos) y las operaciones (métodos) que trabajan con esos datos. La idea es que el objeto “se gestione a sí mismo”: en lugar de que otras partes del programa toquen directamente sus variables internas, se interactúa mediante métodos que definen cómo se consulta o modifica el estado. En Java esto se apoya con los modificadores de acceso (por ejemplo, declarando atributos como private).
+
+La ocultación de información (information hiding) persigue esconder los detalles internos de implementación y exponer solo una interfaz pública (los métodos que se permiten usar). Así, desde fuera se conoce qué hace el objeto (sus servicios), pero no cómo lo hace internamente ni cómo almacena exactamente sus datos. Esto permite que el interior pueda cambiar sin “romper” el código que lo usa, siempre que se mantenga la interfaz.
+
+Ventajas típicas de la ocultación de información: (1) se reduce el acoplamiento (menos dependencias entre clases), (2) se facilita el mantenimiento y la evolución (se pueden cambiar atributos o algoritmos internos sin afectar a quienes usan la clase), (3) se protege la consistencia del objeto (se pueden validar datos y evitar estados inválidos), y (4) se mejora la reutilización y el diseño (interfaces más claras y código más modu
+
+
 
 ## 2. ¿Qué se entiende por la **interfaz pública** de un objeto o clase en POO? Describe brevemente cómo se relaciona con la ocultación de información.
 
 ### Respuesta
 
+La interfaz pública de una clase en POO es el conjunto de métodos y elementos declarados como public que pueden ser utilizados desde otras clases. Es decir, representa todo aquello que se permite usar desde el exterior del objeto. Desde el punto de vista de quien utiliza la clase, la interfaz pública define qué operaciones se pueden realizar sobre el objeto, sin necesidad de conocer cómo están implementadas internamente.
+
+En Java, la interfaz pública suele estar formada por los métodos públicos (por ejemplo, constructores, getters y setters u otros métodos de servicio). Los atributos normalmente se declaran como private, de modo que no pueden modificarse directamente desde fuera. Así, el acceso a los datos se realiza siempre a través de los métodos definidos en la interfaz pública.
+
+La relación con la ocultación de información es directa: al exponer únicamente la interfaz pública y mantener el resto como private, se esconden los detalles internos de implementación. De esta manera, el funcionamiento interno puede modificarse sin afectar al código que utiliza la clase, siempre que la interfaz pública se mantenga estable.
+
+
 
 ## 3. Brevemente: ¿Por qué hay que ser conscientes y diseñar con cuidado la **interfaz pública** de una clase? ¿Es fácil cambiarla?
 
 ### Respuesta
+
+Se debe diseñar con cuidado la interfaz pública de una clase porque constituye el punto de contacto entre esa clase y el resto del programa. Todo lo que se declare como public podrá ser utilizado por otras clases, por lo que cualquier decisión tomada en ese momento afectará directamente a cómo se usará el objeto. Si la interfaz está mal planteada (por ejemplo, exponiendo datos innecesarios o métodos poco coherentes), se generará un diseño más frágil y difícil de mantener.
+
+La interfaz pública actúa como un “contrato”: define qué operaciones ofrece la clase y cómo deben utilizarse. Una vez que otras partes del programa dependen de ese contrato, modificarlo puede provocar errores en el código que ya lo está utilizando. Por ello, no es recomendable exponer más elementos de los necesarios ni cambiar con frecuencia la parte pública de la clase.
+
+En general, no es fácil cambiar la interfaz pública cuando la clase ya está siendo utilizada. Aunque técnicamente se puede modificar el código, cualquier cambio en los métodos públicos (nombre, parámetros o tipo de retorno) obligará a adaptar todas las clases que los usen. Por este motivo, se recomienda diseñarla con previsión y mantener estables los elementos públicos, dejando los detalles internos como private para poder modificarlos sin afectar al exterior.
 
 
 ## 4. ¿Qué son las **invariantes de clase** y por qué la ocultación de información nos ayuda?
