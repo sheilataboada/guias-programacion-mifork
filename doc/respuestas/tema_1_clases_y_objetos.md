@@ -300,3 +300,4 @@ double calculaDistanciaAOrigen(struct Punto p) {
 En este caso, la función calculaDistanciaAOrigen recibe una copia del struct Punto y utiliza sus campos para realizar el cálculo. No existe ningún método dentro del struct, ya que en C los tipos de datos no contienen funciones asociadas directamente.
 
 Respecto a this, en C no existe un mecanismo automático equivalente. En Java, this representa el objeto actual que está ejecutando el método. En C, ese papel lo cumple explícitamente el parámetro que se pasa a la función. Es decir, el objeto que en Java estaría implícito como this, en C debe pasarse manualmente como argumento a la función.
+
