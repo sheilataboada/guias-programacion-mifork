@@ -320,17 +320,97 @@ En el caso de las cadenas (String), se deben comparar utilizando el método equa
 
 ### Respuesta
 
+Las clases wrapper son clases que “envuelven” un tipo primitivo para tratarlo como un objeto. En Java, los tipos primitivos como int, double o char no son objetos, por lo que no pueden utilizarse directamente en ciertos contextos donde se requieren objetos. Para ello existen clases como Integer, Double o Character, que encapsulan el valor primitivo dentro de un objeto.
+
+Este proceso puede hacerse de forma explícita, por ejemplo utilizando métodos como Integer.valueOf(5), o de forma automática mediante el mecanismo llamado autoboxing. El autoboxing permite que el compilador convierta automáticamente un valor primitivo en su clase wrapper correspondiente, y el proceso inverso (unboxing) también se realiza automáticamente cuando es necesario. Por tanto, en muchos casos el programador no tiene que hacer la conversión manualmente.
+
+Las clases wrapper ofrecen ventajas como la posibilidad de usar valores primitivos en estructuras que trabajan con objetos y disponer de métodos adicionales para operar con esos valores. No todos los lenguajes orientados a objetos necesitan wrappers, ya que algunos no distinguen entre tipos primitivos y objetos. Java sí distingue ambos conceptos, y por ello necesita estas clases envoltorio para integrar los tipos primitivos en su modelo orientado a objetos.
+
 
 ## 22. ¿En POO qué es un **tipo de dato enumerado**? ¿En Java, un tipo de dato enumerado es una clase? ¿Qué ventajas tienen en términos de encapsulación los enumerados en Java?
 
 ### Respuesta
+
+En POO, un tipo de dato enumerado es un tipo que define un conjunto fijo y limitado de valores posibles. En lugar de permitir cualquier valor, se restringe a una lista concreta de constantes simbólicas. Por ejemplo, los días de la semana o los estados de un pedido pueden representarse mediante un enumerado para evitar valores inválidos.
+
+En Java, un tipo enumerado se declara con la palabra clave enum y, técnicamente, es una clase especial. Cada valor del enumerado es una instancia de esa clase. Por tanto, un enum en Java no es simplemente un conjunto de constantes como en otros lenguajes más antiguos, sino que puede incluir atributos, métodos e incluso constructores, aunque su uso básico suele limitarse a definir valores constantes.
+
+En términos de encapsulación, los enumerados aportan seguridad y claridad. Al limitar los valores posibles, se evita que se asignen datos incorrectos y se refuerzan las invariantes del programa. Además, al estar definidos como un tipo propio, mejoran la legibilidad y reducen errores frente al uso de números o cadenas para representar estados.
 
 
 ## 23. Crea un tipo enumerado en Java que se llame `Mes`, con doce posibles instancias y que además proporcione métodos para obtener cuántos días tiene ese mes, el ordinal de ese mes en el año (1-12), empleando atributos privados y constructores del tipo enumerado.
 
 ### Respuesta
 
+public enum Mes {
+
+    ENERO(31, 1),
+    FEBRERO(28, 2),
+    MARZO(31, 3),
+    ABRIL(30, 4),
+    MAYO(31, 5),
+    JUNIO(30, 6),
+    JULIO(31, 7),
+    AGOSTO(31, 8),
+    SEPTIEMBRE(30, 9),
+    OCTUBRE(31, 10),
+    NOVIEMBRE(30, 11),
+    DICIEMBRE(31, 12);
+
+    private int dias;
+    private int ordinal;
+
+    private Mes(int dias, int ordinal) {
+        this.dias = dias;
+        this.ordinal = ordinal;
+    }
+
+    public int getDias() {
+        return dias;
+    }
+
+    public int getOrdinal() {
+        return ordinal;
+    }
+}
+
+En este ejemplo, Mes es un tipo enumerado con doce instancias posibles. Cada constante (por ejemplo, ENERO) es una instancia del propio tipo Mes. El enumerado incluye atributos private (dias y ordinal) y un constructor, que también es implícitamente privado, para inicializar esos valores.
+
+Se proporcionan métodos públicos (getDias() y getOrdinal()) para acceder a la información, manteniendo la encapsulación. De esta manera, los datos internos del enumerado están protegidos y solo se pueden consultar mediante la interfaz pública definida.
+
 
 ## 24. Añade a la clase `Mes` del ejercicio anterior cuatro métodos para devolver si ese mes tiene algunos días de invierno, primavera, verano u otoño, indicando con un booleano el hemisferio (norte o sur, parámetro `enHemisferioNorte`). Es decir: `esDePrimavera(boolean esHemisferioNorte)`, `esDeVerano(boolean esHemisferioNorte)`, `esDeOtoño(boolean esHemisferioNorte)`, `esDeInvierno(boolean esHemisferioNorte)`
 
 ### Respuesta
+
+public boolean esDeInvierno(boolean esHemiferioNorte) {
+    if (esHemiferioNorte) {
+        return this == DICIEMBRE || this == ENERO || this == FEBRERO;
+    } else {
+        return this == JUNIO || this == JULIO || this == AGOSTO;
+    }
+}
+
+public boolean esDePrimavera(boolean esHemiferioNorte) {
+    if (esHemiferioNorte) {
+        return this == MARZO || this == ABRIL || this == MAYO;
+    } else {
+        return this == SEPTIEMBRE || this == OCTUBRE || this == NOVIEMBRE;
+    }
+}
+
+public boolean esDeVerano(boolean esHemiferioNorte) {
+    if (esHemiferioNorte) {
+        return this == JUNIO || this == JULIO || this == AGOSTO;
+    } else {
+        return this == DICIEMBRE || this == ENERO || this == FEBRERO;
+    }
+}
+
+public boolean esDeOtono(boolean esHemiferioNorte) {
+    if (esHemiferioNorte) {
+        return this == SEPTIEMBRE || this == OCTUBRE || this == NOVIEMBRE;
+    } else {
+        return this == MARZO || this == ABRIL || this == MAYO;
+    }
+}
