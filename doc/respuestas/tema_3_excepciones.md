@@ -334,7 +334,59 @@ No todos los lenguajes distinguen entre excepciones controladas y no controladas
 
 ### Respuesta
 
+Sí tiene sentido lanzar excepciones dentro de un bloque catch. Cuando se captura una excepción, se puede decidir que el nivel actual no es el más adecuado para resolver el problema y, tras realizar alguna acción (por ejemplo, registrar un mensaje), lanzar otra excepción. Esto permite transformar una excepción técnica en otra más acorde al dominio de la aplicación o añadir información adicional antes de que continúe propagándose.
+
+También es posible relanzar la misma excepción capturada utilizando simplemente throw e;. En este caso, no se crea una nueva excepción, sino que se deja que la original continúe su propagación por la pila de llamadas. Esto tiene sentido cuando se quiere realizar alguna acción local (como registrar el error o liberar recursos) pero sin asumir la responsabilidad de gestionarlo completamente.
+
+Ejemplo de lanzar una nueva excepción desde el catch:
+
+try {
+    int resultado = Integer.parseInt("abc");
+} catch (NumberFormatException e) {
+    throw new IllegalArgumentException("Formato de numero invalido");
+}
+
+Ejemplo de relanzar la misma excepción:
+
+try {
+    int resultado = 10 / 0;
+} catch (ArithmeticException e) {
+    System.out.println("Se detecta el error, pero no se gestiona aqui");
+    throw e;  // se relanza la misma excepcion
+}
+
+En el primer caso se transforma la excepción original en otra más adecuada al contexto. En el segundo caso se permite que la excepción siga su curso después de realizar una acción intermedia, lo que resulta útil cuando la gestión definitiva corresponde a un nivel superior del programa.
 
 ## 17. ¿En qué consiste que una excepción sea la **"causa"** de otra excepción? Pon un ejemplo en Java, donde capturemos una excepción de bajo nivel y la encapsulemos en otra personalizada de alto nivel. Cuando una excepción sale por pantalla y tiene una causa, ¿se ve?
 
 ### Respuesta
+
+Que una excepción sea la causa de otra significa que una excepción original (normalmente de bajo nivel) ha provocado que se lance una segunda excepción (normalmente de nivel más alto), conservando la primera como información interna. Este mecanismo permite encapsular un error técnico dentro de una excepción más adecuada al dominio de la aplicación, sin perder el detalle de lo que realmente ocurrió. En Java, esto se realiza pasando la excepción original como parámetro al constructor de la nueva excepción.
+
+Este enfoque es útil cuando no se desea exponer detalles internos (como errores de acceso a fichero o base de datos) al resto del sistema, pero sí mantener esa información para diagnóstico. Así, se captura la excepción de bajo nivel, se crea una excepción personalizada más representativa del problema general y se establece la original como su causa. De esta forma se respeta la encapsulación y se mantiene la trazabilidad del error.
+
+Ejemplo en Java:
+
+class ErrorAccesoDatos extends Exception {
+
+    public ErrorAccesoDatos(String mensaje, Throwable causa) {
+        super(mensaje, causa);
+    }
+}
+
+public class Servicio {
+
+    public void procesar() throws ErrorAccesoDatos {
+        try {
+            int valor = Integer.parseInt("abc");  // provoca NumberFormatException
+        } catch (NumberFormatException e) {
+            throw new ErrorAccesoDatos("Error al procesar los datos", e);
+        }
+    }
+
+    public static void main(String[] args) throws ErrorAccesoDatos {
+        new Servicio().procesar();
+    }
+}
+
+Cuando una excepción con causa se muestra por pantalla (por ejemplo, si no se captura y se deja que el sistema la imprima), aparece tanto la excepción principal como la causa, normalmente indicada con un mensaje del tipo “Caused by”. Por tanto, sí se ve la excepción original, lo que facilita la depuración al conservar la información completa de la cadena de errores.
