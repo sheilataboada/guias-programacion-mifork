@@ -108,40 +108,152 @@ public class Main {
 
 ### Respuesta
 
+Lanzar una excepción significa crear un objeto que representa un error y enviarlo fuera del método mediante la instrucción throw. Cuando se ejecuta throw, el flujo normal del programa se interrumpe inmediatamente y el método deja de ejecutarse en ese punto. No se continúa con las instrucciones siguientes, sino que el sistema busca un bloque catch adecuado que pueda gestionar ese tipo de excepción.
+
+Controlar o capturar una excepción significa interceptarla mediante un bloque try-catch. Si el tipo de la excepción coincide con el del catch, el control pasa a ese bloque y se ejecuta el código que gestiona el error. En cambio, si en ese método no existe un catch adecuado, se dice que la excepción se propaga hacia el método que realizó la llamada. Esta propagación continúa recorriendo la pila de llamadas hacia atrás hasta que se encuentra un manejador o, si no se encuentra ninguno, el programa termina mostrando el error.
+
+Durante la propagación, los métodos por los que pasa la excepción finalizan su ejecución sin completar normalmente su código. Es decir, no continúan después de la llamada que produjo el error, sino que se “deshace” la pila de llamadas hasta llegar al punto donde se captura. Las funciones que no la controlan no se reanudan automáticamente en el punto donde estaban; simplemente terminan y el flujo continúa en el bloque catch que la gestiona.
+
+Usando el ejemplo anterior de la raíz cuadrada, si el método raiz lanza una excepción al recibir un número negativo, el control pasa inmediatamente al catch del main, siempre que allí se haya incluido:
+
+class Calculadora {
+
+    public double raiz(double numero) {
+        if (numero < 0) {
+            throw new IllegalArgumentException("Numero negativo");
+        }
+        return Math.sqrt(numero);
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        Calculadora calculadora = new Calculadora();
+
+        try {
+            double resultado = calculadora.raiz(-4.0);
+            System.out.println("Resultado: " + resultado);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error capturado: " + e.getMessage());
+        }
+
+        System.out.println("El programa continua despues del bloque try-catch");
+    }
+}
+
+En este caso, al ejecutarse throw, el método raiz termina inmediatamente y no devuelve ningún valor. La excepción se propaga hasta main, donde es capturada en el bloque catch. Tras ejecutarse ese bloque, el programa continúa normalmente con las instrucciones posteriores al try-catch.
+
 
 ## 5. ¿Qué ventajas tiene frente a C, la **"propagación natural"** de las excepciones a través de la pila (*stack*) de llamadas?
 
 ### Respuesta
+
+La propagación natural de excepciones en Java permite que un error viaje automáticamente por la pila de llamadas hasta encontrar un manejador adecuado. Esto supone una ventaja frente a C, donde cada función debe comprobar manualmente los valores de retorno y decidir qué hacer en cada nivel. En Java no es necesario escribir comprobaciones constantes después de cada llamada, ya que el propio mecanismo del lenguaje se encarga de trasladar el problema hacia arriba si no se captura localmente.
+
+Otra ventaja importante es la separación entre lógica principal y control de errores. En C, el código suele llenarse de condiciones para verificar si ha ocurrido algún fallo, lo que puede dificultar la lectura y el mantenimiento. En Java, el flujo normal del programa permanece más limpio, y el tratamiento del error se concentra en bloques try-catch específicos. Esto mejora la claridad y reduce la probabilidad de olvidar una comprobación.
+
+Además, la propagación automática facilita un diseño más modular. Cada método puede centrarse en su responsabilidad y, si no puede resolver el problema, simplemente deja que la excepción continúe propagándose. El nivel superior del programa, que suele tener más contexto global, puede decidir cómo reaccionar. En consecuencia, se obtiene un sistema de gestión de errores más estructurado, coherente con la orientación a objetos y más robusto que el modelo basado únicamente en códigos de retorno.
 
 
 ## 6. En orientación a objetos, ¿las excepciones suelen ser objetos? ¿Qué ventajas tiene esto en términos de encapsulación? ¿Podemos entonces crear excepciones personalizadas?
 
 ### Respuesta
 
+En orientación a objetos, las excepciones son objetos. En Java, todas las excepciones son clases que heredan de la clase base Exception (directa o indirectamente). Esto significa que una excepción no es simplemente un código de error, sino una instancia que puede contener información, como un mensaje descriptivo o incluso otros datos relacionados con el problema ocurrido.
+
+Desde el punto de vista de la encapsulación, esto aporta una ventaja importante: el error se representa como una entidad que agrupa en su interior toda la información necesaria sobre la situación anómala. En lugar de depender de valores especiales o variables externas, el propio objeto excepción encapsula el estado del error. Esto mantiene el diseño más coherente con el modelo de clases y objetos, ya que el comportamiento y los datos se organizan de forma estructurada.
+
+Además, al ser clases, es posible crear excepciones personalizadas. Para ello se define una nueva clase que herede de Exception (o de alguna de sus subclases) y se añade el comportamiento o la información que se considere necesaria. De esta forma, se pueden representar errores específicos del dominio de la aplicación, logrando un sistema de control de errores más expresivo y adaptado al problema que se está resolviendo.
+
 
 ## 7. En relación con las ventajas de la encapsulación, comparando el ejemplo en C con Java. ¿Qué **información esencial** lleva cualquier **objeto excepción** que es muy útil tener cuando se llega a un manejador?
 
 ### Respuesta
+
+En Java, cualquier objeto excepción lleva incorporada información esencial que resulta muy útil cuando se llega a un manejador. En primer lugar, contiene un mensaje descriptivo, que puede consultarse mediante métodos como getMessage(). Este mensaje permite conocer de forma precisa qué ha ocurrido, sin depender de códigos numéricos o convenciones externas como en C.
+
+Además, una excepción almacena información sobre el punto exacto del programa donde se produjo el error, lo que se conoce como la traza de la pila (stack trace). Esta información indica la secuencia de llamadas que llevó hasta el fallo, mostrando clases y métodos implicados. Gracias a ello, el programador puede identificar con mayor facilidad el origen del problema, algo que en C requiere mecanismos adicionales y no viene integrado de forma automática.
+
+Por tanto, frente al modelo basado en valores de retorno, el objeto excepción encapsula tanto el tipo de error como el contexto en el que ocurrió. Esta combinación de mensaje y traza de ejecución proporciona al manejador información rica y estructurada, lo que mejora significativamente la capacidad de diagnóstico y depuración del programa.
 
 
 ## 8. En Java, sobre el bloque **"try-catch"**, ¿se pueden tener más de un bloque `catch`? ¿cuántos bloques `catch` se ejecutan?
 
 ### Respuesta
 
+En Java, en un bloque try-catch se pueden definir varios bloques catch después de un mismo try. Esto permite manejar distintos tipos de excepciones de manera diferenciada. Cada catch especifica el tipo de excepción que es capaz de capturar, lo que ofrece un control más preciso sobre cómo reaccionar ante diferentes errores.
+
+Sin embargo, aunque pueda haber varios catch, solo se ejecuta uno cuando ocurre una excepción. El sistema compara el tipo de la excepción lanzada con los tipos declarados en los catch, en orden, y ejecuta el primero que sea compatible. Una vez encontrado y ejecutado ese bloque, los demás catch no se ejecutan.
+
+Este diseño permite organizar el tratamiento de errores de forma jerárquica. Por ejemplo, se pueden capturar primero excepciones más específicas y después una más general. De esta manera se mantiene un control estructurado del flujo del programa y se evita ejecutar múltiples manejadores para un mismo error.
 
 ## 9. Si las excepciones producen rupturas en el código llamador, ¿cómo podemos garantizar que se ejecuta siempre finalmente un código necesario para cierre de ficheros, liberacion de recursos, antes de que continúe propagándose la excepción? Pon un ejemplo en Java con `finally`, tanto con `catch` como sin él.
 
 ### Respuesta
+
+Cuando una excepción interrumpe el flujo normal del programa, puede provocar que no se ejecuten ciertas instrucciones posteriores, como el cierre de ficheros o la liberación de recursos. Para garantizar que un bloque de código se ejecute siempre, independientemente de que haya o no excepción, Java proporciona el bloque finally. El código incluido en finally se ejecuta tanto si ocurre una excepción como si no, y también aunque la excepción continúe propagándose.
+
+Si se utiliza junto con catch, el bloque finally se ejecuta después de que se haya gestionado la excepción. Si no se incluye un catch, el finally se ejecuta igualmente antes de que la excepción se propague hacia niveles superiores de la pila. Esto resulta fundamental para asegurar la correcta gestión de recursos, especialmente en operaciones de entrada/salida.
+
+Ejemplo con catch:
+
+try {
+    int resultado = 10 / 0;  // provoca ArithmeticException
+} catch (ArithmeticException e) {
+    System.out.println("Error: division por cero");
+} finally {
+    System.out.println("Este bloque se ejecuta siempre");
+}
+
+Ejemplo sin catch:
+
+En el segundo caso, aunque no se capture la excepción, el bloque finally se ejecuta antes de que el error continúe propagándose. De este modo, se garantiza que el código crítico de limpieza se ejecute en cualquier circunstancia.
 
 
 ## 10. En Java, el bloque `finally` puede ir sin `catch`? ¿Se ejecuta siempre tanto si ocurre como si no ocurre una excepción? ¿Y si hay un `return` en medio del `try`?
 
 ### Respuesta
 
+En Java, el bloque finally puede utilizarse sin catch, siempre que exista un bloque try. No es obligatorio capturar la excepción en ese mismo nivel; puede dejarse que se propague. En ese caso, el bloque finally se ejecutará igualmente antes de que la excepción continúe su propagación por la pila de llamadas. Esto permite asegurar la ejecución de código de limpieza aunque no se gestione el error en ese punto.
+
+El bloque finally se ejecuta siempre, tanto si ocurre una excepción como si no ocurre ninguna. Si el código dentro del try se ejecuta con normalidad, el finally se ejecuta al final. Si se produce una excepción y se captura con un catch, el finally se ejecuta después del catch. Y si no se captura, el finally se ejecuta antes de que la excepción se propague.
+
+Incluso si dentro del try aparece un return, el bloque finally también se ejecuta antes de que el método termine realmente. Es decir, el valor de retorno se prepara, pero antes de salir del método se ejecuta el finally. Por ejemplo:
+
+public static int ejemplo() {
+    try {
+        return 5;
+    } finally {
+        System.out.println("Se ejecuta el finally antes de salir del metodo");
+    }
+}
+
+En este caso, el método devuelve 5, pero antes de finalizar se ejecuta el código del finally. Esto demuestra que finally está diseñado para garantizar la ejecución de código crítico independientemente de cómo termine el bloque try.
+
 
 ## 11. En Java, qué son las excepciones **"controladas"** y las **"no controladas"**? ¿Qué papel juega `RuntimeException`? Pon un ejemplo de excepciones típicas controladas y no controladas que incluso nosotros mismos podríamos usar. Haz dos listas con 3 o 4 ejemplos de situación donde se suele preferir una excepción controlada y donde se suele preferir una excepción no controlada.
 
 ### Respuesta
+
+En Java, las excepciones controladas (checked exceptions) son aquellas que el compilador obliga a declarar o capturar. Si un método puede producir una de estas excepciones, debe indicarlo con throws o gestionarla con un bloque try-catch. En cambio, las excepciones no controladas (unchecked exceptions) no están obligadas a declararse ni capturarse. Estas últimas suelen representar errores de programación o situaciones que no se consideran recuperables de forma normal.
+
+La clase RuntimeException juega un papel central en esta clasificación. Todas las excepciones que heredan de RuntimeException son no controladas. Por ejemplo, ArithmeticException, NullPointerException o IndexOutOfBoundsException pertenecen a este grupo. En cambio, excepciones como IOException, SQLException o FileNotFoundException son controladas y obligan a tratarlas explícitamente.
+
+Ejemplos típicos de excepciones controladas que se usan habitualmente:
+
+IOException (errores de entrada/salida).
+FileNotFoundException (fichero no encontrado).
+ParseException (error al interpretar un formato).
+
+Ejemplos típicos de excepciones no controladas:
+
+ArithmeticException (división por cero).
+NullPointerException (uso de referencia nula).
+NumberFormatException (conversión incorrecta de texto a número).
+
+Se suele preferir una excepción controlada cuando el error es previsible y el programa puede recuperarse, por ejemplo al abrir un fichero que puede no existir o al leer datos externos. En cambio, se suele preferir una excepción no controlada cuando el error indica un fallo de programación, como acceder a un índice inválido o usar un objeto no inicializado, ya que en esos casos no se espera una recuperación normal sino una corrección del código.
 
 
 ## 12. ¿Qué es y para qué se usa `throws`? ¿Por qué es alternativa a capturar una excepción controlada?
