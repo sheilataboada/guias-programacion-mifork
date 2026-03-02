@@ -260,20 +260,74 @@ Se suele preferir una excepción controlada cuando el error es previsible y el p
 
 ### Respuesta
 
+En Java, throws se utiliza en la cabecera de un método para indicar que dicho método puede producir una excepción controlada y que no la gestiona internamente. De esta forma, en lugar de capturar la excepción con un bloque try-catch, el método declara que la excepción puede propagarse al código que lo llama. Esto forma parte del mecanismo de comprobación en tiempo de compilación de las excepciones controladas.
+
+Se considera una alternativa a capturar la excepción porque permite delegar la responsabilidad de gestionarla en un nivel superior. En vez de resolver el problema en el propio método, se deja que otro método con más contexto decida cómo actuar. Esto es útil cuando el método no dispone de información suficiente para tratar el error adecuadamente o cuando se desea centralizar el tratamiento en un punto concreto del programa.
+
+Por ejemplo, si un método abre un fichero y puede producir una IOException, puede declararse así:
+
+import java.io.IOException;
+
+public void leerDatos() throws IOException {
+    // código que puede producir IOException
+}
+
+En este caso, quien llame a leerDatos() estará obligado a capturar la excepción o a volver a declararla con throws. Así, throws no elimina la excepción, sino que la propaga de forma explícita, manteniendo el control estructurado que caracteriza a las excepciones controladas en Java.
 
 ## 13. Pon un ejemplo en Java de firma de método que incluya `throws`, de una función que abre un fichero pero que declara que no le interesa menejar la excepción de si el fichero no existe, sino que se propague hacia arriba. Eso sí, acuérdate del `finally`.
 
 ### Respuesta
+
+Cuando un método abre un fichero, puede producirse una excepción controlada como FileNotFoundException o IOException. Si no se desea manejarla en ese mismo método, se puede declarar con throws en la firma, permitiendo que la excepción se propague hacia el método que realiza la llamada. De este modo, se delega la responsabilidad del tratamiento del error en un nivel superior del programa.
+
+No obstante, aunque se decida no capturar la excepción, puede ser necesario ejecutar código de limpieza. Para ello se utiliza el bloque finally, que se ejecuta siempre, tanto si ocurre la excepción como si no. Esto resulta útil, por ejemplo, para cerrar recursos abiertos o mostrar mensajes de control, antes de que la excepción continúe propagándose.
+
+Un ejemplo simplificado podría ser el siguiente:
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class Lector {
+
+    public void leerFichero(String nombre) throws IOException {
+        BufferedReader lector = null;
+
+        try {
+            lector = new BufferedReader(new FileReader(nombre));
+            System.out.println("Fichero abierto correctamente");
+        } finally {
+            System.out.println("Se ejecuta el bloque finally");
+            if (lector != null) {
+                lector.close();
+            }
+        }
+    }
+}
+
+En este caso, el método declara throws IOException, por lo que no captura la posible excepción si el fichero no existe. Sin embargo, el bloque finally se ejecuta siempre antes de que la excepción se propague hacia el método llamador, garantizando así la ejecución del código necesario de cierre o control.
 
 
 ## 14. ¿Podemos poner en `throws` excepciones no controladas, como `RuntimeException`? ¿Debería el método llamador entonces poner `try-catch` en ese caso? ¿Qué sentido tendría?
 
 ### Respuesta
 
+En Java sí es posible declarar en la cláusula throws excepciones no controladas, como las que heredan de RuntimeException. El lenguaje no lo prohíbe, ya que cualquier tipo de excepción puede aparecer en la firma de un método. Sin embargo, a diferencia de las excepciones controladas, el compilador no obliga a hacerlo ni obliga al llamador a capturarlas.
+
+Si un método declara en throws una RuntimeException, el método llamador no está obligado a escribir un bloque try-catch. Puede hacerlo si lo desea, pero no es necesario desde el punto de vista del compilador. Esto se debe a que las excepciones no controladas representan normalmente errores de programación o situaciones que no se consideran recuperables de manera habitual.
+
+En cuanto al sentido práctico, declarar una excepción no controlada en throws puede tener valor documental, ya que informa explícitamente de que el método puede producir cierto tipo de error. No obstante, no cambia el comportamiento obligatorio del llamador. Por ello, en la práctica, no suele ser necesario declarar las excepciones no controladas en la firma, ya que forman parte del modelo implícito del lenguaje y su captura queda a criterio del programador según el diseño de la aplicación.
+
 
 ## 15. ¿Cuándo se recomienda usar excepciones controladas, como `IOException`, y cuándo no controladas como `IllegalArgumentException`? ¿Existen en todos los lenguajes ambas opciones? En los que sólo existe una opción, ¿cuál es la más habitual?
 
 ### Respuesta
+
+Se recomienda utilizar excepciones controladas (como IOException) cuando el error es previsible y forma parte del funcionamiento normal del sistema, especialmente si el programa puede recuperarse de la situación. Por ejemplo, al trabajar con ficheros, redes o bases de datos, es razonable que algo falle y que el programa deba reaccionar (volver a intentar, mostrar un mensaje, pedir otro dato, etc.). En estos casos, obligar al programador a declarar o capturar la excepción ayuda a no olvidar su tratamiento.
+
+En cambio, se suelen utilizar excepciones no controladas (como IllegalArgumentException) cuando el error indica un uso incorrecto del método o un fallo de programación. Por ejemplo, pasar un parámetro inválido a un método que exige ciertas condiciones. En estas situaciones no se espera que el programa “se recupere” de forma normal, sino que se corrija el código que provoca el error. Por ello no se obliga a capturarlas, ya que representan errores lógicos más que situaciones externas.
+
+No todos los lenguajes distinguen entre excepciones controladas y no controladas. Java es uno de los casos más representativos donde sí existe esta separación formal. En muchos otros lenguajes modernos (como C#, Python o C++), todas las excepciones funcionan de manera similar a las no controladas de Java, es decir, no existe una obligación en tiempo de compilación de declararlas o capturarlas. Por tanto, cuando solo existe una opción, lo habitual es el modelo equivalente a las excepciones no controladas, donde la gestión queda a criterio del programador y no del compilador.
 
 
 ## 16. ¿Tiene sentido lanzar excepciones dentro del `catch`? ¿Se puede relanzar la misma excepción capturada? ¿Cuándo tendría sentido hacer esto último? Pon ejemplos de ambos casos.
