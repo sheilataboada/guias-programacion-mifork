@@ -129,7 +129,6 @@ En el ejemplo anterior, una Linea está compuesta exactamente por dos objetos Pu
 
 Por otro lado, desde el punto de vista inverso, un Punto podría pertenecer a ninguna, una o varias líneas, dependiendo del uso del programa. Por tanto, la multiplicidad desde Punto hacia Linea sería 0 → n (un punto puede estar en cero o muchas líneas). Esto indica que un mismo punto puede reutilizarse en diferentes líneas sin restricciones, lo cual es habitual en este tipo de modelos geométricos.
 
-
 ## 4. ¿Qué significa composición **fuerte** y composición **débil**? ¿Qué consecuencia implica en relación al ciclo de vida de los objetos? Indica a cuál solemos referirnos como **"asociación o agregación"** y a cuál como **"composición"** propiamente.
 
 ### Respuesta
@@ -219,10 +218,142 @@ De este modo, se observa claramente la diferencia: en la composición fuerte, lo
 
 ### Respuesta
 
+En Java, en una composición fuerte, los objetos contenidos (como Punto dentro de Linea) se destruyen cuando deja de existir el objeto contenedor. Sin embargo, esta destrucción no ocurre de forma explícita en el código, sino que está gestionada automáticamente por el sistema de memoria del lenguaje.
+
+Esto se debe a que Java utiliza un mecanismo llamado recolector de basura (garbage collector). Cuando un objeto deja de ser accesible (por ejemplo, cuando ya no existe ninguna referencia a una Linea), el recolector de basura detecta que tanto la Linea como los objetos Punto que contiene ya no se usan, y los elimina de memoria automáticamente. Por tanto, no es necesario (ni posible) destruirlos manualmente como en C o C++.
+
+La razón por la que no se observa una destrucción explícita de los Punto es precisamente porque Java abstrae la gestión de memoria. En una composición fuerte, el programador garantiza la relación lógica (los puntos pertenecen a la línea), pero es el entorno de ejecución quien se encarga del ciclo de vida real de los objetos. Esto simplifica el desarrollo y evita errores relacionados con la liberación manual de memoria.
 
 ## 8. Pon un ejemplo de composicion débil entre un departamento que tiene varios profesores. Implementa dos composiciones a la vez: entre el departamento y todos sus profesores y entre el departamento y su director, que es un profesor del departamento. Siempre debe haber un director en el departamento desde el inicio. Lanza excepciones si se viola la invariante. Emplea arrays primitivos de Java, estilo `Profesor[]`, con máximo 50, pero no rompas la encapsulación, no desveles que estás empleando un array, permite añadir un `Profesor` al final de la lista, y eliminar un profesor dada su posición. Da acceso a los profesores con un método para saber cuántos hay y otro para obtener un profesor por posición. El director se puede cambiar por otro profesor del departamento. Sin embargo, ten en cuenta esta invariante de clase: el director debe formar siempre parte de la lista de profesores, es decir, ten cuidado al cambiar el director o al eliminar un profesor.
 
 ### Respuesta
+
+En este ejemplo se modela una composición débil o asociación, porque los objetos Profesor pueden existir independientemente del Departamento; simplemente colaboran entre sí. Además, se usan dos relaciones a la vez: el departamento tiene varios profesores y también tiene un director, que debe ser uno de esos profesores. La parte delicada del diseño está en mantener la invariante: siempre debe haber director y ese director siempre debe pertenecer a la lista de profesores. Esto encaja con la idea de asociación del tema, donde los objetos colaboran sin que su existencia dependa unos de otros.
+
+Como se pide usar Profesor[] con tamaño máximo 50 y sin romper la encapsulación, no se devuelve nunca el array completo, sino solo el número de profesores y un profesor por posición. Además, como los arrays en Java tienen tamaño fijo una vez creados, se reserva desde el principio el espacio máximo y se lleva un contador con el número real de elementos almacenados. También conviene comprobar bien los índices, porque acceder fuera de rango provoca errores.
+
+Una implementación posible sería la siguiente:
+
+public class Profesor {
+    private final String nombre;
+
+    public Profesor(String nombre) {
+        if (nombre == null || nombre.isBlank()) {
+            throw new IllegalArgumentException("El nombre del profesor no puede estar vacío.");
+        }
+        this.nombre = nombre;
+    }
+
+    public String getNombre() {
+        return this.nombre;
+    }
+
+    @Override
+    public String toString() {
+        return "Profesor[nombre=" + this.nombre + "]";
+    }
+}
+
+public class Departamento {
+    private static final int MAX_PROFESORES = 50;
+
+    private final String nombre;
+    private final Profesor[] profesores;
+    private int numProfesores;
+    private Profesor director;
+
+    public Departamento(String nombre, Profesor directorInicial) {
+        if (nombre == null || nombre.isBlank()) {
+            throw new IllegalArgumentException("El nombre del departamento no puede estar vacío.");
+        }
+        if (directorInicial == null) {
+            throw new IllegalArgumentException("El departamento debe crearse con un director.");
+        }
+
+        this.nombre = nombre;
+        this.profesores = new Profesor[MAX_PROFESORES];
+        this.numProfesores = 0;
+
+        this.profesores[this.numProfesores] = directorInicial;
+        this.numProfesores++;
+        this.director = directorInicial;
+    }
+
+    public String getNombre() {
+        return this.nombre;
+    }
+
+    public Profesor getDirector() {
+        return this.director;
+    }
+
+    public int getNumProfesores() {
+        return this.numProfesores;
+    }
+
+    public Profesor getProfesor(int posicion) {
+        if (posicion < 0 || posicion >= this.numProfesores) {
+            throw new IndexOutOfBoundsException("Posición de profesor no válida.");
+        }
+        return this.profesores[posicion];
+    }
+
+    public void anhadirProfesor(Profesor profesor) {
+        if (profesor == null) {
+            throw new IllegalArgumentException("No se puede añadir un profesor nulo.");
+        }
+        if (this.numProfesores == MAX_PROFESORES) {
+            throw new IllegalStateException("No caben más profesores en el departamento.");
+        }
+
+        this.profesores[this.numProfesores] = profesor;
+        this.numProfesores++;
+    }
+
+    public void cambiarDirector(Profesor nuevoDirector) {
+        if (nuevoDirector == null) {
+            throw new IllegalArgumentException("El nuevo director no puede ser nulo.");
+        }
+        if (!perteneceAlDepartamento(nuevoDirector)) {
+            throw new IllegalArgumentException("El nuevo director debe pertenecer al departamento.");
+        }
+
+        this.director = nuevoDirector;
+    }
+
+    public void eliminarProfesor(int posicion) {
+        if (posicion < 0 || posicion >= this.numProfesores) {
+            throw new IndexOutOfBoundsException("Posición de profesor no válida.");
+        }
+
+        if (this.profesores[posicion] == this.director) {
+            throw new IllegalStateException("No se puede eliminar al director del departamento.");
+        }
+
+        for (int i = posicion; i < this.numProfesores - 1; i++) {
+            this.profesores[i] = this.profesores[i + 1];
+        }
+
+        this.profesores[this.numProfesores - 1] = null;
+        this.numProfesores--;
+    }
+
+    private boolean perteneceAlDepartamento(Profesor profesor) {
+        boolean encontrado = false;
+        int i = 0;
+
+        while (i < this.numProfesores && !encontrado) {
+            if (this.profesores[i] == profesor) {
+                encontrado = true;
+            }
+            i++;
+        }
+
+        return encontrado;
+    }
+}
+
+En esta solución, la invariante se mantiene así: el constructor obliga a crear el departamento con director, ese director se inserta ya en la lista de profesores, el cambio de director solo permite elegir un profesor que ya pertenezca al departamento, y la eliminación impide borrar al director actual. De ese modo, nunca se llega a un estado inválido en el que el departamento carezca de director o en el que el director no forme parte de la lista de profesores.
 
 
 ## 9. En Java, existen también `List`, cambia y muestra cómo sería el código anterior empleando `List` en vez de arrays primitivos. ¿Qué parte del código original te has ahorrado? Además, fíjate en el método `getProfesor(int pos)`: si en su lugar existiera un método que devolviera todos los profesores a la vez, ¿qué problema tendría devolver directamente la lista interna? ¿Cómo lo resolverías?
