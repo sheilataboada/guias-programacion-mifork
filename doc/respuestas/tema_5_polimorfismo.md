@@ -160,22 +160,321 @@ Por eso puede decirse que, en Java, el polimorfismo no aparece de golpe solo en 
 
 ### Respuesta
 
+Una **clase abstracta** es una clase pensada para servir de base a otras clases, pero no para crear objetos directamente a partir de ella. Se utiliza cuando interesa definir una idea general común, dejando algunas partes sin concretar para que cada subclase las complete a su manera. Por eso, **no se pueden crear instancias** de una clase abstracta con `new`.
+
+Un **método abstracto** es un método que solo se declara, pero **no tiene cuerpo** en esa clase. Su función es obligar a las subclases a dar una implementación propia. En este caso, puede hacerse que `Soldado` tenga un comportamiento común en `saludar()`, pero que el método `atacar()` quede sin definir en la clase general, para que cada tipo de soldado ataque de una forma distinta.
+
+La palabra clave **`abstract`** debe ponerse en dos sitios. Por un lado, en la cabecera de la clase: `abstract class Soldado`. Por otro lado, en la cabecera del método abstracto: `public abstract void atacar();`. Debe observarse que ese método termina en `;` porque no lleva cuerpo. Después, cada subclase concreta, como `Zapador` o `Artillero`, está obligada a implementar `atacar()` si quiere poder crear objetos de esa clase.
+
+```java
+public class Principal {
+
+    public static void main(String[] args) {
+
+        Soldado[] soldados = new Soldado[2];
+
+        soldados[0] = new Zapador();
+        soldados[1] = new Artillero();
+
+        for (int i = 0; i < soldados.length; i++) {
+            soldados[i].saludar();
+            soldados[i].atacar();
+        }
+
+        // Esto no se puede hacer:
+        // Soldado s = new Soldado();
+    }
+}
+
+abstract class Soldado {
+
+    public void saludar() {
+        System.out.println("Soy un soldado y saludo de forma general.");
+    }
+
+    public abstract void atacar();
+}
+
+class Zapador extends Soldado {
+
+    @Override
+    public void atacar() {
+        System.out.println("El zapador ataca colocando explosivos.");
+    }
+}
+
+class Artillero extends Soldado {
+
+    @Override
+    public void atacar() {
+        System.out.println("El artillero ataca disparando la artilleria.");
+    }
+}
+```
+
+En este ejemplo, `Soldado` define lo común y deja `atacar()` sin concretar. Después, cada subclase completa ese método con su propia acción. Así, al recorrer un array de referencias de tipo `Soldado`, puede pedirse a todos que `ataquen`, aunque cada objeto responda de manera distinta según su tipo real.
+
+
 
 ## 8. ¿Qué efecto tiene la palabra clave `final` sobre métodos y clases en Java? ¿Cómo se relaciona con el polimorfismo? ¿Conoces algún ejemplo de clase `final` en la propia API estándar de Java?
 
 ### Respuesta
+
+La palabra clave **`final`** limita la posibilidad de extender comportamiento. Si se aplica a una **clase**, impide que esa clase tenga subclases. Si se aplica a un **método**, impide que ese método pueda ser **sobrescrito** en una clase derivada. Por tanto, `final` se usa cuando se quiere dejar cerrada una parte del diseño y evitar que otra clase la cambie mediante herencia. Además, una clase no puede ser a la vez `abstract` y `final`, porque una obliga a derivar para completar comportamiento y la otra prohíbe precisamente esa derivación.
+
+Su relación con el **polimorfismo** es directa: el polimorfismo por herencia necesita que una subclase pueda redefinir métodos de una superclase. Si una clase es `final`, ya no puede haber subclases; y si un método es `final`, ya no puede existir una versión redefinida en una clase hija. En consecuencia, `final` **recorta** o **bloquea** esa variación polimórfica. Dicho de forma simple, donde se pone `final`, se está diciendo que ahí no se quiere permitir una especialización posterior mediante herencia.
+
+Sí, existe algún ejemplo muy conocido en la API estándar de Java: **`String`** es una clase `final`. Eso significa que no se puede crear una subclase de `String`. Es un ejemplo muy representativo porque se usa constantemente y muestra bien la idea de una clase cuyo comportamiento queda cerrado y no se deja extender por herencia.
 
 
 ## 9. En Java, qué son las **"interfaces"**? ¿Son como clases abstractas? ¿Una clase puede implementar más de una interfaz?
 
 ### Respuesta
 
+Las **interfaces** se usan para definir un conjunto de métodos que una clase debe ofrecer. No representan tanto una implementación concreta como un **compromiso de comportamiento**: si una clase implementa una interfaz, queda obligada a dar cuerpo a esos métodos. Por eso resultan útiles cuando interesa decir *qué sabe hacer* una clase, sin entrar todavía en *cómo lo hace*.
+
+Pueden entenderse como algo **muy parecido a una clase abstracta pura**. La idea es que en la interfaz se escriben las cabeceras de los métodos, pero no su implementación, y después las clases concretas se encargan de completarlos. La diferencia práctica que suele destacarse es que una clase abstracta forma parte de una jerarquía de herencia, mientras que una interfaz sirve para fijar unas operaciones que otras clases deben cumplir.
+
+Sí, una clase puede **implementar más de una interfaz**. De hecho, esa es una de sus utilidades más importantes, ya que Java solo permite herencia simple entre clases, pero sí permite que una misma clase cumpla varios contratos a la vez. La sintaxis general es escribir la clase y, después, usar `implements` seguido de una o varias interfaces separadas por comas.
+
+```java
+interface Saludador {
+    void saludar();
+}
+
+interface Atacante {
+    void atacar();
+}
+
+class Soldado implements Saludador, Atacante {
+
+    @Override
+    public void saludar() {
+        System.out.println("El soldado saluda.");
+    }
+
+    @Override
+    public void atacar() {
+        System.out.println("El soldado ataca.");
+    }
+}
+```
+
+
 
 ## 10. Vamos a poner un ejemplo nuevo con polimorfismo. Queremos implementar una clase `Punto`, con un método `calcularDistanciaA`, que permite calcular la distancia a otro `Punto`. Sin embargo, como queremos trabajar con puntos 2D y 3D, haz que ese método sea abstracto y haya dos implementaciones de ese cálculo de distancia. Emplea `instanceof` y *downcasting* para verificar que se recibe un punto compatible y poder calcular correctamente la distancia siempre entre puntos del mismo subtipo. Aprovecha este diseño para crear ahora una clase `Linea`, que acepta `Punto`, sin saber de qué tipo es, y es capaz de dar su longitud independientemente de las dimensiones de sus puntos (las cuales desconoce).
 
 ### Respuesta
 
+Se puede resolver haciendo que `Punto` sea una **clase abstracta** y que declare el método abstracto `calcularDistanciaA(Punto otroPunto)`. Después, cada subtipo concreto implementa ese cálculo según sus propias coordenadas. Así, `Punto2D` calcula con dos componentes y `Punto3D` con tres. De ese modo, la operación existe en todos los puntos, pero cada clase la realiza de forma distinta.
+
+Como el parámetro del método es de tipo general `Punto`, dentro de cada implementación debe comprobarse si el objeto recibido pertenece al subtipo correcto. Para eso se usa `instanceof`. Si la comprobación es verdadera, se hace **downcasting** para convertir la referencia general `Punto` en `Punto2D` o `Punto3D` y poder acceder a los datos necesarios para el cálculo. Si no coincide el tipo, conviene lanzar una excepción, porque no tendría sentido mezclar un punto 2D con uno 3D en esa distancia.
+
+La clase `Linea` muestra el polimorfismo con claridad. `Linea` recibe dos referencias de tipo `Punto` y no necesita saber si son 2D o 3D. Simplemente pide a un extremo que calcule la distancia al otro. La versión concreta del método que se ejecuta se decide en tiempo de ejecución según el tipo real del objeto. Así, la clase `Linea` puede trabajar con distintas dimensiones sin conocerlas directamente.
+
+```java
+public class Principal {
+
+    public static void main(String[] args) {
+
+        Punto punto2D1 = new Punto2D(1.0, 2.0);
+        Punto punto2D2 = new Punto2D(4.0, 6.0);
+
+        Punto punto3D1 = new Punto3D(1.0, 2.0, 3.0);
+        Punto punto3D2 = new Punto3D(5.0, 5.0, 7.0);
+
+        Linea linea2D = new Linea(punto2D1, punto2D2);
+        Linea linea3D = new Linea(punto3D1, punto3D2);
+
+        System.out.println("Longitud de la linea 2D: "
+                + linea2D.calcularLongitud());
+        System.out.println("Longitud de la linea 3D: "
+                + linea3D.calcularLongitud());
+
+        try {
+            Linea lineaInvalida = new Linea(punto2D1, punto3D1);
+            System.out.println("Longitud invalida: "
+                    + lineaInvalida.calcularLongitud());
+        }
+        catch (IllegalArgumentException excepcion) {
+            System.out.println(excepcion.getMessage());
+        }
+    }
+}
+
+abstract class Punto {
+
+    public abstract double calcularDistanciaA(Punto otroPunto);
+}
+
+class Punto2D extends Punto {
+
+    private double x;
+    private double y;
+
+    public Punto2D(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    @Override
+    public double calcularDistanciaA(Punto otroPunto) {
+
+        if (!(otroPunto instanceof Punto2D)) {
+            throw new IllegalArgumentException(
+                    "No se puede calcular la distancia entre un Punto2D y un punto de otro subtipo."
+            );
+        }
+
+        Punto2D otroPunto2D = (Punto2D) otroPunto;
+
+        double diferenciaX = this.x - otroPunto2D.getX();
+        double diferenciaY = this.y - otroPunto2D.getY();
+
+        return Math.sqrt(diferenciaX * diferenciaX
+                + diferenciaY * diferenciaY);
+    }
+}
+
+class Punto3D extends Punto {
+
+    private double x;
+    private double y;
+    private double z;
+
+    public Punto3D(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public double getZ() {
+        return z;
+    }
+
+    @Override
+    public double calcularDistanciaA(Punto otroPunto) {
+
+        if (!(otroPunto instanceof Punto3D)) {
+            throw new IllegalArgumentException(
+                    "No se puede calcular la distancia entre un Punto3D y un punto de otro subtipo."
+            );
+        }
+
+        Punto3D otroPunto3D = (Punto3D) otroPunto;
+
+        double diferenciaX = this.x - otroPunto3D.getX();
+        double diferenciaY = this.y - otroPunto3D.getY();
+        double diferenciaZ = this.z - otroPunto3D.getZ();
+
+        return Math.sqrt(diferenciaX * diferenciaX
+                + diferenciaY * diferenciaY
+                + diferenciaZ * diferenciaZ);
+    }
+}
+
+class Linea {
+
+    private Punto inicio;
+    private Punto fin;
+
+    public Linea(Punto inicio, Punto fin) {
+        this.inicio = inicio;
+        this.fin = fin;
+    }
+
+    public double calcularLongitud() {
+        return inicio.calcularDistanciaA(fin);
+    }
+}
+```
+
+```text
+Salida aproximada:
+
+Longitud de la linea 2D: 5.0
+Longitud de la linea 3D: 6.4031242374328485
+No se puede calcular la distancia entre un Punto2D y un punto de otro subtipo.
+```
+
+
 
 ## 11. ¿Qué es la **"herencia de interfaces"** en Java? ¿Existe **"herencia múltiple de interfaces"**? Pon un ejemplo de una interfaz `Fichero` que tenga un método para leer su contenido en forma de `String` y luego dicha interfaz sea extendida por otra que sea `FicheroEscribible` que permita enviar contenido e incluso eliminar el fichero.
 
 ### Respuesta
+
+La **herencia de interfaces** consiste en que una interfaz puede ampliar otra para **heredar su contrato** y añadir nuevas operaciones. En este caso no se hereda código de implementación, sino **cabeceras de métodos** que después deberán cumplirse. Puede verse como una forma de especializar una interfaz más general en otra más concreta. Así, `FicheroEscribible` puede partir de `Fichero`, conservar la capacidad de leer contenido y añadir además operaciones nuevas, como escribir o borrar.
+
+Sí, en Java existe **herencia múltiple de interfaces**. Eso significa que una interfaz puede heredar de varias interfaces al mismo tiempo, y también que una clase puede implementar varias interfaces. La idea es útil porque permite reunir varios comportamientos en una misma clase sin necesidad de recurrir a herencia múltiple entre clases. De ese modo, una clase concreta puede comprometerse a cumplir varios contratos a la vez.
+
+En el ejemplo siguiente, `Fichero` define la operación básica de lectura y `FicheroEscribible` **extiende** esa interfaz para añadir escritura y borrado. La clase `FicheroTexto` implementa la interfaz más completa y, por tanto, queda obligada a definir todos esos métodos.
+
+```java
+public class Principal {
+
+    public static void main(String[] args) {
+
+        FicheroEscribible fichero = new FicheroTexto("Hola");
+
+        System.out.println(fichero.leerContenido());
+        fichero.escribirContenido("Nuevo contenido");
+        System.out.println(fichero.leerContenido());
+        fichero.eliminar();
+        System.out.println(fichero.leerContenido());
+    }
+}
+
+interface Fichero {
+
+    String leerContenido();
+}
+
+interface FicheroEscribible extends Fichero {
+
+    void escribirContenido(String contenido);
+
+    void eliminar();
+}
+
+class FicheroTexto implements FicheroEscribible {
+
+    private String contenido;
+
+    public FicheroTexto(String contenidoInicial) {
+        contenido = contenidoInicial;
+    }
+
+    @Override
+    public String leerContenido() {
+        return contenido;
+    }
+
+    @Override
+    public void escribirContenido(String contenido) {
+        this.contenido = contenido;
+    }
+
+    @Override
+    public void eliminar() {
+        contenido = "";
+    }
+}
+```
+
+Si se quisiera mostrar **herencia múltiple de interfaces** de forma más clara, podría hacerse que `FicheroEscribible` heredase de varias interfaces distintas, por ejemplo una para leer y otra para borrar. Pero la idea de base es la misma: una interfaz puede extender otra u otras, y una clase concreta implementa después ese contrato completo.
