@@ -187,25 +187,232 @@ En este ejemplo, la novedad es la clase Medico. Sin embargo, el bucle que pide e
 
 ### Respuesta
 
+Sí, se puede tener una referencia del supertipo que apunte a un objeto real de un subtipo. Eso ocurre porque la herencia también establece una relación de tipos: un Artillero puede tratarse como un Soldado. A esta conversión hacia arriba se le llama upcasting, y es segura. Gracias a ello, en un array de Soldado pueden almacenarse objetos Soldado, Artillero o cualquier otro subtipo compatible.
+
+Ahora bien, con una referencia de tipo Soldado no se pueden invocar directamente métodos que solo existan en Artillero, porque el compilador solo deja usar lo que pertenece al tipo declarado de la referencia. Sí puede ocurrir que se invoque un método heredado o reescrito, como saludar(), pero si se quiere acceder a algo específico del subtipo, como getNumeroCohetes(), hace falta convertir la referencia al subtipo real. Esa conversión hacia abajo se llama downcasting, y no siempre es segura, porque no toda referencia Soldado apunta realmente a un Artillero.
+
+Para comprobar en tiempo de ejecución si el objeto real pertenece a un subtipo concreto se utiliza instanceof. Si el resultado es verdadero, entonces puede hacerse el cast con seguridad razonable y acceder al comportamiento específico de ese subtipo. Esta técnica puede ser útil en casos concretos, aunque no conviene abusar de ella, porque si se necesitase continuamente distinguir tipos concretos, el diseño podría estar perdiendo generalidad.
+
+``` java
+class Soldado {
+    private String nombre; // nombre comun a todos los soldados
+
+    public Soldado(String nombre) {
+        this.nombre = nombre; // inicializa el nombre
+    }
+
+    public String getNombre() {
+        return nombre; // devuelve el nombre
+    }
+
+    public void saludar() {
+        System.out.println("Hola, soy " + nombre + "."); // saludo comun
+    }
+}
+
+class Artillero extends Soldado {
+    private int numeroCohetes; // dato especifico del artillero
+
+    public Artillero(String nombre, int numeroCohetes) {
+        super(nombre); // inicializa la parte heredada
+        this.numeroCohetes = numeroCohetes; // inicializa su dato propio
+    }
+
+    public int getNumeroCohetes() {
+        return numeroCohetes; // devuelve los cohetes
+    }
+}
+
+class Zapador extends Soldado {
+    private int numeroMinas; // dato especifico del zapador
+
+    public Zapador(String nombre, int numeroMinas) {
+        super(nombre); // inicializa la parte heredada
+        this.numeroMinas = numeroMinas; // inicializa su dato propio
+    }
+
+    public int getNumeroMinas() {
+        return numeroMinas; // devuelve las minas
+    }
+}
+
+public class Principal {
+    public static void main(String[] args) {
+        Soldado[] ejercito = new Soldado[4]; // array del supertipo
+
+        ejercito[0] = new Soldado("Luis"); // objeto del tipo base
+        ejercito[1] = new Artillero("Ana", 12); // upcasting implicito
+        ejercito[2] = new Zapador("Marta", 8); // upcasting implicito
+        ejercito[3] = new Artillero("Pablo", 20); // upcasting implicito
+
+        for (int i = 0; i < ejercito.length; i++) {
+            ejercito[i].saludar(); // todos pueden saludar porque todos son Soldado
+
+            if (ejercito[i] instanceof Artillero) { // comprueba el tipo real del objeto
+                Artillero artillero = (Artillero) ejercito[i]; // downcasting
+                System.out.println(
+                    artillero.getNombre() + " tiene "
+                    + artillero.getNumeroCohetes() + " cohetes."
+                ); // acceso a un metodo especifico de Artillero
+            }
+        }
+    }
+}
+```
+
 
 ## 6. Respecto a la ocultación de información y herencia, ¿qué significa acceso **"protegido"** de métodos y/o atributos? ¿Cómo se implementa en Java? Pon un ejemplo de uso de en la clase `Soldado` para que su nombre sea protegido y pueda usarse en el método de poner bombas del `Zapador`.
 
 ### Respuesta
+
+El acceso protected es un nivel de visibilidad intermedio entre private y public. Un miembro protected no queda accesible para cualquiera, pero sí puede utilizarse desde las subclases. Esto resulta útil cuando se quiere mantener cierta ocultación de información respecto al exterior y, al mismo tiempo, permitir que las clases derivadas reutilicen directamente un atributo o método heredado sin necesidad de hacerlo completamente público.
+
+En Java se implementa escribiendo la palabra reservada protected delante del atributo o del método. Si, por ejemplo, en Soldado se define protected String nombre;, ese atributo seguirá perteneciendo a Soldado, pero podrá ser usado dentro de Zapador o Artillero. La idea es que el dato no quede abierto para cualquier clase, pero sí para aquellas que forman parte de la jerarquía de herencia. Así, Zapador podría usar nombre directamente en su método ponerBombas().
+
+En el ejemplo pedido, nombre deja de ser privado y pasa a ser protegido para que la subclase pueda acceder a él sin necesidad de un getter. De este modo, Zapador puede utilizar ese atributo heredado para mostrar qué soldado está poniendo minas o bombas. Es una solución válida cuando se desea que el acceso exista solo para las subclases, aunque en otros diseños también podría preferirse mantener private y acceder mediante métodos públicos o protegidos.
+ 
+``` java
+class Soldado {
+    protected String nombre; // atributo accesible desde las subclases
+
+    public Soldado(String nombre) {
+        this.nombre = nombre; // inicializa el nombre del soldado
+    }
+
+    public void saludar() {
+        System.out.println("Hola, soy " + nombre + "."); // metodo comun
+    }
+}
+
+class Zapador extends Soldado {
+    private int numeroMinas; // dato propio del zapador
+
+    public Zapador(String nombre, int numeroMinas) {
+        super(nombre); // inicializa la parte heredada
+        this.numeroMinas = numeroMinas; // inicializa el dato propio
+    }
+
+    public int getNumeroMinas() {
+        return numeroMinas; // devuelve el numero de minas
+    }
+
+    public void ponerBombas() {
+        System.out.println(nombre + " esta poniendo "
+                + numeroMinas + " minas."); // usa directamente el atributo protected
+    }
+}
+
+public class Principal {
+    public static void main(String[] args) {
+        Zapador zapador = new Zapador("Marta", 8); // crea un zapador
+        zapador.saludar(); // metodo heredado de Soldado
+        zapador.ponerBombas(); // metodo propio de Zapador
+    }
+}
+``` 
 
 
 ## 7. En los lenguajes orientados a objetos ¿hay una **clase base** para todos los objetos? ¿Ocurre en todos los lenguajes? ¿Qué ocurre en Java?
 
 ### Respuesta
 
+No en todos los lenguajes orientados a objetos tiene por qué existir una única clase base común para todos los objetos. Eso depende del diseño del lenguaje y de cómo organice su jerarquía de tipos. En algunos casos sí existe una raíz común para todos los objetos, mientras que en otros el modelo no obliga a que todo pase por una única clase base universal. Por tanto, no conviene asumir esa idea como una regla general de toda la orientación a objetos.
+
+En Java sí ocurre. Existe una clase común llamada Object, que actúa como superclase de todas las clases. Esto significa que cualquier clase definida en Java es, directa o indirectamente, una extensión de Object, incluso aunque no se escriba explícitamente extends Object. Por eso se dice que en Java hay una herencia implícita desde esa clase base común.
+
+La consecuencia práctica es que todos los objetos de Java comparten ciertos comportamientos generales heredados de Object, como por ejemplo la posibilidad de disponer de una representación en forma de cadena mediante toString(). Después, cada clase concreta puede mantener ese comportamiento tal cual o redefinirlo si se necesita una versión más específica. Así, Soldado, Artillero o Zapador serían todos, al mismo tiempo, objetos de sus propias clases y también objetos de Object.
 
 ## 8. ¿Qué es la **"herencia múltiple"**? ¿Existe en Java herencia múltiple?
 
 ### Respuesta
 
+La herencia múltiple consiste en que una misma clase pueda heredar directamente de más de una superclase al mismo tiempo. Es decir, una clase derivada recibiría estado y comportamiento de varias clases base distintas. La idea puede parecer útil porque permitiría reutilizar elementos procedentes de varias jerarquías, pero también complica mucho el diseño, ya que pueden aparecer conflictos si dos superclases definen miembros con el mismo nombre o comportamientos incompatibles.
+
+En Java no existe herencia múltiple de clases. En Java solo se permite la herencia simple, es decir, una clase puede extender directamente de una sola clase mediante extends. Por eso, una clase como Artillero puede ser subclase de Soldado, pero no podría extender a la vez de Soldado y de otra clase distinta. Así, la jerarquía de clases queda más clara y se evitan ambigüedades.
+
+Por tanto, la respuesta es que la herencia múltiple sí existe como concepto general en orientación a objetos, pero Java no la admite entre clases. En Java, cada clase tiene una única superclase directa, aunque después pueda seguir existiendo una cadena de herencia hacia arriba.
+
 
 ## 9. Las excepciones en los lenguajes orientados a objetos son objetos. Por tanto, se pueden crear excepciones personalizadas. Pon un ejemplo en Java de una excepción personalizada (`UsuarioNoEncontradoException`), que sea *no controlada* y que además este compuesto con un `Usuario`, para saber qué `Usuario` dio el problema. Permite además que se pueda incluir la causa, es decir, sobrecarga el constructor para tener una versión que permita añadir la causa subyacente. 
 
 ### Respuesta
+
+Las excepciones en Java son objetos y, por eso, también pueden especializarse mediante herencia. Cuando interesa distinguir distintos errores, puede definirse una clase propia para representar un caso concreto. Si además se quiere que la excepción sea no controlada, lo habitual es hacer que herede de RuntimeException, de modo que no exista obligación de capturarla o declararla con throws. La idea es la misma que en otras jerarquías: se parte de una clase más general y se crea un subtipo más específico para clasificar mejor el error.
+
+En el ejemplo pedido, la excepción UsuarioNoEncontradoException no solo hereda comportamiento de la jerarquía de excepciones, sino que además está compuesta con un objeto Usuario. Eso permite guardar dentro de la excepción el usuario concreto que provocó el problema. Así, el error no solo transmite un mensaje, sino también información adicional útil para consultar después mediante un getter. Esa relación es de composición porque la excepción contiene como atributo una referencia a otro objeto.
+
+Para incluir la causa subyacente, basta con sobrecargar el constructor y ofrecer una segunda versión que reciba también un Throwable. En esa versión se llama a super(mensaje, causa), de forma que la excepción personalizada conserve tanto su propio contexto como el error original que la provocó. Con ello se consigue una excepción más completa: clasifica el error, guarda el Usuario implicado y, si hace falta, encadena la causa interna.
+
+``` java
+class Usuario {
+    private String nombre; // nombre del usuario
+    private String identificador; // identificador del usuario
+
+    public Usuario(String nombre, String identificador) {
+        this.nombre = nombre; // inicializa el nombre
+        this.identificador = identificador; // inicializa el identificador
+    }
+
+    public String getNombre() {
+        return nombre; // devuelve el nombre
+    }
+
+    public String getIdentificador() {
+        return identificador; // devuelve el identificador
+    }
+
+    public String toString() {
+        return nombre + " (" + identificador + ")"; // representacion del usuario
+    }
+}
+
+class UsuarioNoEncontradoException extends RuntimeException {
+    private Usuario usuario; // composicion: la excepcion contiene un Usuario
+
+    public UsuarioNoEncontradoException(String mensaje, Usuario usuario) {
+        super(mensaje); // envia el mensaje a la superclase
+        this.usuario = usuario; // guarda el usuario que dio el problema
+    }
+
+    public UsuarioNoEncontradoException(String mensaje, Usuario usuario,
+            Throwable causa) {
+        super(mensaje, causa); // guarda mensaje y causa subyacente
+        this.usuario = usuario; // guarda el usuario que dio el problema
+    }
+
+    public Usuario getUsuario() {
+        return usuario; // devuelve el usuario asociado al error
+    }
+}
+
+public class Principal {
+    public static void main(String[] args) {
+        Usuario usuario = new Usuario("Ana", "u123"); // usuario de ejemplo
+
+        try {
+            // ejemplo de lanzamiento sin causa
+            throw new UsuarioNoEncontradoException(
+                    "No se ha encontrado el usuario.", usuario);
+        } catch (UsuarioNoEncontradoException excepcion) {
+            System.out.println(excepcion.getMessage()); // muestra el mensaje
+            System.out.println(excepcion.getUsuario()); // muestra el usuario
+        }
+
+        try {
+            // ejemplo de lanzamiento con causa subyacente
+            NullPointerException causa = new NullPointerException(
+                    "Fallo interno al buscar en memoria.");
+
+            throw new UsuarioNoEncontradoException(
+                    "No se ha encontrado el usuario.", usuario, causa);
+        } catch (UsuarioNoEncontradoException excepcion) {
+            System.out.println(excepcion.getMessage()); // muestra el mensaje
+            System.out.println(excepcion.getUsuario()); // muestra el usuario
+            System.out.println(excepcion.getCause()); // muestra la causa
+        }
+    }
+}
+```
 
 
 ## 10. Herencia vs. Composición. Se dice que no se debe emplear herencia simplemente por reutilizar código, es decir, que si quiero reutilizar código simplemente, no debo pensar en herencia como primera opción ¿por qué?
