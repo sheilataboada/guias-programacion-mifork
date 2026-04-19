@@ -419,17 +419,184 @@ public class Principal {
 
 ### Respuesta
 
+No debe pensarse en la herencia como primera opción cuando lo único que se busca es **reutilizar código**, porque heredar no significa solo “copiar” atributos y métodos: también significa establecer una relación conceptual de tipo **“es-un”**. Si esa relación no existe de verdad, el diseño queda forzado y poco natural. Por ejemplo, no tendría sentido hacer que `Empleado` herede de `Empresa` solo para aprovechar código, porque un empleado no es un tipo de empresa. En esos casos se estaría haciendo un uso incorrecto de la herencia.
+
+Además, la herencia crea una relación más fuerte entre clases. La subclase queda ligada a la superclase y pasa a depender de cómo esté diseñada. Si más adelante cambia la clase base, ese cambio puede afectar a todas las subclases. Por eso, usar herencia “por conveniencia” suele producir jerarquías artificiales, más difíciles de entender y de mantener. La herencia debe reservarse para casos en los que realmente se quiera **clasificar** objetos y aprovechar la compatibilidad de tipos y el polimorfismo.
+
+Cuando solo interesa reutilizar funcionalidad, normalmente resulta más razonable pensar primero en **composición**. En composición una clase **tiene** o **usa** otra clase como parte de su funcionamiento, pero sin afirmar que una sea un tipo de la otra. Así se reutiliza código sin crear una jerarquía incorrecta. En resumen, la herencia no debe elegirse por simple ahorro de trabajo, sino cuando exista una relación auténtica de especialización; si no, suele ser mejor componer que heredar.
+
+
 
 ## 11. Herencia vs. Composición. Se dice que se debe *"favorecer la composición frente a la herencia"*, ¿por qué?
 
 ### Respuesta
+
+Se dice que conviene **favorecer la composición frente a la herencia** porque la composición reutiliza funcionalidad sin obligar a establecer una relación de tipo **“es-un”**. En herencia, una subclase no solo aprovecha código: también pasa a considerarse un caso particular de la superclase. Si esa idea no es verdadera, el diseño queda mal planteado desde el principio. En cambio, con composición basta con que una clase **tenga** o **use** otra, es decir, una relación del tipo **“tiene-un”** o **“forma parte de”**, que suele resultar más natural en muchos problemas.
+
+Además, la composición produce un diseño más **flexible** y con menos dependencia entre clases. Cuando se hereda, la subclase queda muy ligada a la superclase y a su forma de trabajar. Si cambia la clase base, las derivadas pueden verse afectadas. Con composición, cada clase mantiene mejor su independencia, y la funcionalidad reutilizada puede cambiarse, sustituirse o reorganizarse con menos impacto. Por eso suele ser una solución más fácil de mantener y ampliar.
+
+En consecuencia, la herencia debe reservarse para cuando exista una verdadera **especialización** y se quiera aprovechar también la **compatibilidad de tipos** y el **polimorfismo**. Si lo único que se busca es reutilizar comportamiento, compartir una parte común o colaborar con otra clase, normalmente resulta más razonable componer que heredar. Dicho de forma simple: **si no puede afirmarse claramente que una clase es un tipo de otra, es mejor no usar herencia**.
 
 
 ## 12. Herencia vs. Composición. Se dice que la *"herencia rompe la encapsulación"*, ¿a qué se refiere esto?
 
 ### Respuesta
 
+Se dice que la **herencia rompe la encapsulación** porque una subclase no usa a la superclase solo desde fuera, como haría cualquier otra clase, sino que entra en una relación mucho más íntima con ella. En lugar de limitarse a trabajar con la interfaz pública, la clase derivada puede depender de atributos y métodos heredados, e incluso de miembros `protected`. Eso hace que parte de la implementación interna de la clase base deje de estar realmente “escondida” para sus subclases.
+
+El problema aparece cuando la subclase empieza a construirse apoyándose en cómo está hecha la superclase por dentro, y no solo en lo que esta promete hacer. En ese momento, un cambio interno en la clase base puede afectar al funcionamiento de las clases derivadas, aunque desde fuera parezca que la interfaz pública no ha cambiado. Por eso la herencia crea un acoplamiento fuerte: la subclase queda muy ligada a las decisiones internas de la superclase.
+
+Dicho de forma sencilla, encapsular significa ocultar los detalles internos y obligar a usar una clase a través de una forma controlada. Con herencia, esa barrera se debilita, porque las subclases pasan a tener acceso privilegiado a parte de ese interior. Por eso no conviene heredar solo para reutilizar código: cuanto más dependa una subclase de la implementación de la superclase, más frágil y menos mantenible será el diseño.
+
+
 
 ## 13. Pongamos un ejemplo de dos alternativas para lo mismo. Tenemos un `Estudiante` y un `Trabajador`, ambos tienen datos en común: el DNI y el nombre. Modelemos esto de dos formas: uno por herencia, con una superclase `Persona`, y otro con composición, con una clase `DatosPersonales`. Se debe recibir una instancia de `DatosPersonales` en el constructor de la clase `Estudiante` y `Trabajador`.
 
 ### Respuesta
+
+Para modelar un caso como este, pueden plantearse dos alternativas válidas. La primera consiste en usar **herencia**, creando una superclase `Persona` con los datos comunes (`dni` y `nombre`) y haciendo que `Estudiante` y `Trabajador` hereden de ella. En este caso, se está diciendo que tanto un estudiante como un trabajador **son un tipo de** persona. Esa solución resulta natural si lo que se quiere expresar es precisamente una clasificación.
+
+La segunda alternativa consiste en usar **composición**, creando una clase `DatosPersonales` que contenga `dni` y `nombre`, y haciendo que `Estudiante` y `Trabajador` tengan un atributo de ese tipo. En este caso, no se afirma que `Estudiante` o `Trabajador` sean un subtipo de `DatosPersonales`, sino que **tienen** unos datos personales. Por eso, esta solución encaja bien cuando lo que interesa es compartir una parte común sin crear una jerarquía de herencia.
+
+La diferencia de fondo está en la relación que se quiere expresar. Con herencia se reutiliza código y además se establece una relación de especialización. Con composición se reutiliza una parte común sin crear esa dependencia jerárquica. En el ejemplo pedido, ambas opciones sirven para representar lo mismo, pero la versión con composición deja más claro que `dni` y `nombre` son simplemente una parte reutilizable que se pasa al constructor de `Estudiante` y `Trabajador`.
+
+```java
+// =========================
+// OPCION 1: HERENCIA
+// =========================
+
+class Persona {
+    private String dni; // dato comun
+    private String nombre; // dato comun
+
+    public Persona(String dni, String nombre) {
+        this.dni = dni; // inicializa el dni
+        this.nombre = nombre; // inicializa el nombre
+    }
+
+    public String getDni() {
+        return dni; // devuelve el dni
+    }
+
+    public String getNombre() {
+        return nombre; // devuelve el nombre
+    }
+}
+
+class EstudianteHerencia extends Persona {
+    private String carrera; // dato especifico del estudiante
+
+    public EstudianteHerencia(String dni, String nombre, String carrera) {
+        super(dni, nombre); // inicializa la parte heredada
+        this.carrera = carrera; // inicializa el dato propio
+    }
+
+    public void mostrarDatos() {
+        System.out.println("Estudiante: " + getNombre()
+                + ", DNI: " + getDni()
+                + ", Carrera: " + carrera); // muestra los datos
+    }
+}
+
+class TrabajadorHerencia extends Persona {
+    private String empresa; // dato especifico del trabajador
+
+    public TrabajadorHerencia(String dni, String nombre, String empresa) {
+        super(dni, nombre); // inicializa la parte heredada
+        this.empresa = empresa; // inicializa el dato propio
+    }
+
+    public void mostrarDatos() {
+        System.out.println("Trabajador: " + getNombre()
+                + ", DNI: " + getDni()
+                + ", Empresa: " + empresa); // muestra los datos
+    }
+}
+
+
+// =========================
+// OPCION 2: COMPOSICION
+// =========================
+
+class DatosPersonales {
+    private String dni; // dato comun
+    private String nombre; // dato comun
+
+    public DatosPersonales(String dni, String nombre) {
+        this.dni = dni; // inicializa el dni
+        this.nombre = nombre; // inicializa el nombre
+    }
+
+    public String getDni() {
+        return dni; // devuelve el dni
+    }
+
+    public String getNombre() {
+        return nombre; // devuelve el nombre
+    }
+}
+
+class EstudianteComposicion {
+    private DatosPersonales datosPersonales; // composicion: tiene unos datos personales
+    private String carrera; // dato especifico del estudiante
+
+    public EstudianteComposicion(DatosPersonales datosPersonales, String carrera) {
+        this.datosPersonales = datosPersonales; // recibe la instancia por constructor
+        this.carrera = carrera; // inicializa el dato propio
+    }
+
+    public void mostrarDatos() {
+        System.out.println("Estudiante: " + datosPersonales.getNombre()
+                + ", DNI: " + datosPersonales.getDni()
+                + ", Carrera: " + carrera); // muestra los datos
+    }
+}
+
+class TrabajadorComposicion {
+    private DatosPersonales datosPersonales; // composicion: tiene unos datos personales
+    private String empresa; // dato especifico del trabajador
+
+    public TrabajadorComposicion(DatosPersonales datosPersonales, String empresa) {
+        this.datosPersonales = datosPersonales; // recibe la instancia por constructor
+        this.empresa = empresa; // inicializa el dato propio
+    }
+
+    public void mostrarDatos() {
+        System.out.println("Trabajador: " + datosPersonales.getNombre()
+                + ", DNI: " + datosPersonales.getDni()
+                + ", Empresa: " + empresa); // muestra los datos
+    }
+}
+
+
+// =========================
+// EJEMPLO DE USO
+// =========================
+
+public class Principal {
+    public static void main(String[] args) {
+        // uso de la opcion con herencia
+        EstudianteHerencia estudiante1 =
+                new EstudianteHerencia("111A", "Ana", "Informatica");
+        TrabajadorHerencia trabajador1 =
+                new TrabajadorHerencia("222B", "Luis", "EmpresaX");
+
+        estudiante1.mostrarDatos(); // muestra datos del estudiante
+        trabajador1.mostrarDatos(); // muestra datos del trabajador
+
+        // uso de la opcion con composicion
+        DatosPersonales datosEstudiante =
+                new DatosPersonales("333C", "Marta");
+        DatosPersonales datosTrabajador =
+                new DatosPersonales("444D", "Pablo");
+
+        EstudianteComposicion estudiante2 =
+                new EstudianteComposicion(datosEstudiante, "Matematicas");
+        TrabajadorComposicion trabajador2 =
+                new TrabajadorComposicion(datosTrabajador, "EmpresaY");
+
+        estudiante2.mostrarDatos(); // muestra datos del estudiante
+        trabajador2.mostrarDatos(); // muestra datos del trabajador
+    }
+}
+```
