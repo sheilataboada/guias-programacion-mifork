@@ -10,6 +10,7 @@ La composición en C se utiliza cuando una estructura está formada por otras es
 En este contexto, se puede definir una estructura Punto con dos atributos (x, y) y una estructura Linea que contenga dos objetos de tipo Punto. Además, es habitual acompañar estas estructuras con funciones que operen sobre ellas, como el cálculo de la distancia entre dos puntos o la longitud de una línea, reutilizando la lógica definida previamente.
 
 A continuación se muestra un ejemplo completo en C que implementa esta idea:
+```c
 
 #include <stdio.h>
 #include <math.h>
@@ -60,7 +61,7 @@ int main() {
 
     return 0;
 }
-
+```
 
 Este ejemplo ilustra claramente la composición: la estructura Linea no almacena datos simples directamente, sino que contiene otras estructuras (Punto). Además, se observa cómo la función de longitud reutiliza la función de distancia, lo que favorece la modularidad y evita duplicar código.
 
@@ -73,6 +74,7 @@ En orientación a objetos, la composición se expresa mediante clases que contie
 Para conseguir que los objetos sean inmutables, se declaran los atributos como private y final, y no se proporcionan métodos setters. De este modo, una vez creado un objeto Punto o Linea, sus valores no pueden modificarse. Además, la funcionalidad se incorpora dentro de las propias clases mediante métodos, como el cálculo de la distancia entre puntos o la longitud de una línea, aprovechando así las ventajas de la programación orientada a objetos frente al enfoque procedural.
 
 A continuación se muestra una posible implementación en Java:
+```java
 
 /**
  * @brief Clase que representa un punto en el plano (inmutable)
@@ -116,6 +118,7 @@ public class Linea {
         return p1.distancia(p2);
     }
 }
+```
 
 En este diseño se observa claramente la composición: la clase Linea tiene dos objetos Punto. Además, gracias a la encapsulación y al uso de atributos final, se garantiza que ni los puntos ni la línea puedan modificarse tras su creación, lo que mejora la seguridad y coherencia del programa respecto a la solución en C.
 
@@ -158,6 +161,7 @@ En cambio, la composición implica que una clase contiene a otra como atributo (
 En este caso se pide implementar dos versiones de la relación entre Linea y Punto, diferenciando claramente el tipo de composición. La diferencia clave está en el ciclo de vida de los objetos Punto: en la composición fuerte, los puntos se crean dentro de la propia Linea y no existen fuera de ella; mientras que en la composición débil, los puntos se reciben desde fuera y pueden compartirse con otras líneas.
 
 En la composición fuerte, la clase Linea es responsable de crear sus propios puntos. Esto implica que los puntos no pueden existir sin la línea y su ciclo de vida está completamente ligado. No se reciben objetos Punto desde fuera, sino que se construyen internamente a partir de los valores necesarios.
+```java
 
 /**
  * @brief Clase Punto (inmutable)
@@ -175,8 +179,9 @@ public class Punto {
         return Math.sqrt(Math.pow(this.x - otro.x, 2) + Math.pow(this.y - otro.y, 2));
     }
 }
-
+```
 Por otro lado, en la composición débil (agregación), la clase Linea recibe los objetos Punto desde el exterior. Esto implica que los puntos pueden existir independientemente de la línea y pueden ser compartidos entre varias líneas. La línea no controla su creación ni su ciclo de vida.
+```java
 
 /**
  * @brief Composición débil: Linea usa puntos externos
@@ -211,7 +216,7 @@ public class LineaDebil {
         return p1.distancia(p2);
     }
 }
-
+```
 De este modo, se observa claramente la diferencia: en la composición fuerte, los objetos Punto dependen totalmente de Linea, mientras que en la composición débil pueden existir de forma independiente. Esta distinción es fundamental en diseño orientado a objetos, ya que afecta directamente a la reutilización y al control de los objetos.
 
 ## 7. En Java, en la composición fuerte, ¿cuando el contenedor destruye los objetos? No se observa que `Linea` destruya los `Punto` explícitamente, ¿Por qué?
@@ -233,6 +238,7 @@ En este ejemplo se modela una composición débil o asociación, porque los obje
 Como se pide usar Profesor[] con tamaño máximo 50 y sin romper la encapsulación, no se devuelve nunca el array completo, sino solo el número de profesores y un profesor por posición. Además, como los arrays en Java tienen tamaño fijo una vez creados, se reserva desde el principio el espacio máximo y se lleva un contador con el número real de elementos almacenados. También conviene comprobar bien los índices, porque acceder fuera de rango provoca errores.
 
 Una implementación posible sería la siguiente:
+```java
 
 public class Profesor {
     private final String nombre;
@@ -352,7 +358,7 @@ public class Departamento {
         return encontrado;
     }
 }
-
+```
 En esta solución, la invariante se mantiene así: el constructor obliga a crear el departamento con director, ese director se inserta ya en la lista de profesores, el cambio de director solo permite elegir un profesor que ya pertenezca al departamento, y la eliminación impide borrar al director actual. De ese modo, nunca se llega a un estado inválido en el que el departamento carezca de director o en el que el director no forme parte de la lista de profesores.
 
 ## 9. En Java, existen también `List`, cambia y muestra cómo sería el código anterior empleando `List` en vez de arrays primitivos. ¿Qué parte del código original te has ahorrado? Además, fíjate en el método `getProfesor(int pos)`: si en su lugar existiera un método que devolviera todos los profesores a la vez, ¿qué problema tendría devolver directamente la lista interna? ¿Cómo lo resolverías?
@@ -363,6 +369,7 @@ Al emplear List en lugar de arrays, la idea de asociación o composición débil
 
 Con List, el código se simplifica porque ya no hace falta reservar 50 posiciones, ni mantener un contador numProfesores, ni desplazar manualmente los elementos al eliminar uno. Esa es la parte principal que se ahorra del código original. Además, sigue siendo importante mantener la encapsulación, ya que los apuntes insisten en que los atributos deben ser privados y en que el acceso debe controlarse mediante métodos.
 
+```java
 import java.util.ArrayList;
 import java.util.List;
 
@@ -385,7 +392,8 @@ public class Profesor {
         return "Profesor[nombre=" + this.nombre + "]";
     }
 }
-
+```
+```java
 import java.util.ArrayList;
 import java.util.List;
 
@@ -464,6 +472,7 @@ public class Departamento {
         return List.copyOf(this.profesores);
     }
 }
+```
 
 Si existiese un método que devolviese todos los profesores a la vez, el problema de devolver directamente la lista interna sería que desde fuera podría modificarse su contenido, rompiendo la encapsulación y también la invariante de la clase. Por ejemplo, podría eliminarse al director o añadirse un elemento sin pasar por las comprobaciones del departamento. Para evitarlo, no debe devolverse la lista interna tal cual, sino una copia defensiva, por ejemplo con List.copyOf(...), como aparece en el código. Así, desde fuera se puede consultar la colección, pero no alterarla directamente.
 
@@ -474,6 +483,7 @@ Si existiese un método que devolviese todos los profesores a la vez, el problem
 Las composiciones recursivas se producen cuando una clase contiene como atributo otra instancia de su misma clase. Es decir, se establece una relación “tiene-un” consigo misma. Este tipo de diseño es útil para modelar estructuras jerárquicas o encadenadas, como ocurre en el caso de una persona que tiene una madre, que a su vez es otra persona. Al igual que en otros casos de composición, puede aplicarse encapsulación para garantizar propiedades como la inmutabilidad.
 
 En este ejemplo, se define una clase Persona inmutable, donde cada objeto puede tener una referencia a su madre. Al ser inmutable, los atributos se declaran private final y no existen métodos que permitan modificarlos tras la construcción. Además, se permite que la madre sea null para representar el final de la cadena (por ejemplo, la abuela si no se conoce más información).
+```java
 
 /**
  * @brief Clase Persona inmutable con composición recursiva
@@ -498,9 +508,11 @@ public class Persona {
         return this.madre;
     }
 }
+```
 
 A continuación, se muestra un ejemplo en main donde se construye una pequeña cadena familiar desde la abuela hasta el nieto:
 
+```java
 public class Main {
     public static void main(String[] args) {
         Persona abuela = new Persona("Carmen", null);
@@ -513,6 +525,7 @@ public class Main {
         System.out.println("Abuela del nieto: " + nieto.getMadre().getMadre().getNombre());
     }
 }
+```
 
 Un ejemplo clásico adicional de composición recursiva es una lista enlazada, donde cada nodo contiene un valor y una referencia al siguiente nodo, que es del mismo tipo. También ocurre en estructuras como árboles (cada nodo tiene hijos que son nodos) o en excepciones encadenadas en Java, donde una excepción puede contener otra como causa. Estos casos reflejan cómo una clase puede componerse de sí misma para modelar estructuras complejas.
 
