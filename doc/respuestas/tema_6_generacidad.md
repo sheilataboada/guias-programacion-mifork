@@ -67,8 +67,6 @@ El inconveniente de esta solución es que se pierde seguridad de tipos en compil
 
 ### Respuesta
 
-### Respuesta
-
 La **programación genérica** consiste en escribir algoritmos o estructuras de datos sin depender de un tipo concreto. Es decir, se busca que una misma clase o método pueda trabajar con distintos tipos de datos sin tener que repetir el mismo código para `String`, `Integer`, `Persona`, etc. Por ejemplo, una pila, una cola o una lista pueden tener la misma lógica interna aunque almacenen datos de tipos diferentes.
 
 El ejemplo anterior sí puede considerarse un ejemplo **muy básico** de programación genérica, porque la estructura de datos no está limitada a un único tipo concreto. Al usar `Object`, se permite guardar valores de distintos tipos dentro de la misma estructura, de forma parecida a como en C se puede usar `void*` para apuntar a datos de diferentes tipos.
@@ -77,8 +75,6 @@ Sin embargo, no es la forma más segura ni la más propia de la genericidad mode
 
 
 ## 3. Indica los problemas respecto al chequeo de tipos, de emplear `void*` o `Object` cuando se crean estructuras de datos genéricas. 
-
-### Respuesta
 
 ### Respuesta
 
@@ -190,7 +186,6 @@ Por tanto, la diferencia principal es que Java usa **borrado de tipos** para man
 ## 7. Vamos a crear una nueva clase con parámetros de tipo. Define en Java una clase `Par`, que permite alojar dos valores de tipos diferentes. Incluye un constructor y un getter para cada tipo. Pon un ejemplo de uso de ese `Par`, por ejemplo para especificar el tipo de retorno de una función que devuelve en un `Par` la media y desviación típica de un array de `double`. 
 
 ### Respuesta
-
 
 Una clase con **parámetros de tipo** puede recibir más de un tipo genérico. En este caso, una clase `Par<T, U>` permite guardar dos valores, donde el primero puede ser de un tipo y el segundo de otro distinto. Por ejemplo, podría usarse como `Par<String, Integer>`, `Par<Double, Double>` o `Par<String, Boolean>`.
 
@@ -465,6 +460,9 @@ Por tanto, la versión con genéricos refuerza el chequeo de tipos porque conser
 
 
 ## 11. Hagamos un ejemplo avanzado. El siguiente código, con interfaz `Punto`, que define un método `calcularDistanciaA(Punto p)`, junto con las implementaciones `Punto2D` y `Punto3D`. Añade generics para asegurarnos que la sobreescritura del método calcular distancia a otro `Punto` siempre es sobre un `Punto` del mismo tipo, evitando `instanceof` y el downcasting.
+
+
+
 ```java
 public interface Punto { 
     public double distanciaA(Punto p); 
