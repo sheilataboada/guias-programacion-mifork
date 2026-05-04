@@ -50,6 +50,8 @@ La ocultación de información ayuda a mantener las invariantes porque impide qu
 
 A continuación se muestra un ejemplo sencillo de una clase Punto con dos coordenadas x e y de tipo double, aplicando ocultación de información mediante atributos private:
 
+``` java
+
 public class Punto {
 
     private double x;
@@ -72,6 +74,7 @@ public class Punto {
         return y;
     }
 }
+```
 
 En este ejemplo, la interfaz pública de la clase está formada por el constructor Punto(double x, double y), el método calcularDistanciaAlOrigen() y los métodos getX() y getY(). Estos son los únicos elementos accesibles desde otras clases, es decir, lo que se puede utilizar externamente para interactuar con el objeto.
 
@@ -108,6 +111,8 @@ En Java, los miembros de instancia declarados como private están ocultos para (
 
 A continuación se muestra la clase Punto ampliada con el método calcularDistanciaAPunto(Punto otro):
 
+``` java
+
 public class Punto {
 
     private double x;
@@ -128,6 +133,7 @@ public class Punto {
         return Math.sqrt(diferenciaX * diferenciaX + diferenciaY * diferenciaY);
     }
 }
+```
 
 En el método calcularDistanciaAPunto, se accede directamente a otro.x y otro.y, aunque esos atributos son private. Esto es posible porque el acceso se realiza desde dentro de la misma clase Punto. Sin embargo, si se intentara acceder a x o y desde una clase distinta, el compilador produciría un error. Por tanto, la ocultación private protege frente a otras clases, pero no impide que los objetos de la misma clase accedan entre sí a sus miembros privados.
 
@@ -184,6 +190,7 @@ En Java, los miembros de clase se indican utilizando la palabra clave static. Es
 
 A continuación se muestra una versión ampliada de la clase Punto, donde se incluyen miembros static que almacenan los valores máximos de x e y creados hasta el momento:
 
+``` java
 public class Punto {
 
     private double x;
@@ -212,20 +219,20 @@ public class Punto {
         return maxY;
     }
 }
-
+```
 En este ejemplo, maxX y maxY son atributos de clase (static) que guardan el mayor valor de x e y observado en todos los objetos creados. Cada vez que se construye un nuevo Punto, el constructor actualiza esos máximos si corresponde. Los métodos getMaxX() y getMaxY() también son static, ya que consultan información común a toda la clase y no a un objeto concreto. De esta forma, se distingue claramente entre miembros de instancia (propios de cada objeto) y miembros de clase (compartidos por todos).
 
 
 ## 14. Como sería un método factoría dentro de la clase `Punto` para construir un `Punto` a partir de dos coordenadas, pero que las redondee al entero más cercano. Escribe sólo el código del método, no toda la clase ¿Has usado `static`? 
 
 ### Respuesta
-
+``` java
 public static Punto crearPuntoRedondeado(double x, double y) {
     double xRedondeado = Math.round(x);
     double yRedondeado = Math.round(y);
     return new Punto(xRedondeado, yRedondeado);
 }
-
+```
 Sí, se ha utilizado static. Un método factoría suele declararse como miembro de clase porque su función es crear objetos, y para ello no es necesario disponer previamente de una instancia. Al ser static, puede invocarse directamente sobre la clase, por ejemplo: Punto.crearPuntoRedondeado(2.7, 3.4);.
 
 ## 15. Cambia la implementación de `Punto`. En vez de dos `double`, emplea un array interno de dos posiciones, intentando no modificar la interfaz pública de la clase.
@@ -234,6 +241,7 @@ Sí, se ha utilizado static. Un método factoría suele declararse como miembro 
 
 Para cambiar la implementación interna sin modificar la interfaz pública, se pueden sustituir los dos atributos double x y double y por un array interno de dos posiciones. Desde el exterior, la clase seguirá ofreciendo los mismos constructores y métodos públicos, por lo que el código que la utilice no tendrá que cambiar.
 
+ ``` java
 public class Punto {
 
     private double[] coordenadas = new double[2];
@@ -256,7 +264,7 @@ public class Punto {
         return coordenadas[1];
     }
 }
-
+```
 En este diseño, la interfaz pública no se ha modificado: el constructor y los métodos getX(), getY() y calcularDistanciaAlOrigen() siguen existiendo y funcionan igual desde el punto de vista del usuario. Lo único que cambia es la representación interna de los datos.
 
 Este ejemplo muestra claramente la utilidad de la ocultación de información: al mantener los atributos como private, es posible cambiar la implementación interna (de dos variables a un array) sin afectar al código externo que utiliza la clase.
@@ -341,7 +349,7 @@ En términos de encapsulación, los enumerados aportan seguridad y claridad. Al 
 ## 23. Crea un tipo enumerado en Java que se llame `Mes`, con doce posibles instancias y que además proporcione métodos para obtener cuántos días tiene ese mes, el ordinal de ese mes en el año (1-12), empleando atributos privados y constructores del tipo enumerado.
 
 ### Respuesta
-
+``` java
 public enum Mes {
 
     ENERO(31, 1),
@@ -373,7 +381,7 @@ public enum Mes {
         return ordinal;
     }
 }
-
+```
 En este ejemplo, Mes es un tipo enumerado con doce instancias posibles. Cada constante (por ejemplo, ENERO) es una instancia del propio tipo Mes. El enumerado incluye atributos private (dias y ordinal) y un constructor, que también es implícitamente privado, para inicializar esos valores.
 
 Se proporcionan métodos públicos (getDias() y getOrdinal()) para acceder a la información, manteniendo la encapsulación. De esta manera, los datos internos del enumerado están protegidos y solo se pueden consultar mediante la interfaz pública definida.
@@ -382,6 +390,7 @@ Se proporcionan métodos públicos (getDias() y getOrdinal()) para acceder a la 
 ## 24. Añade a la clase `Mes` del ejercicio anterior cuatro métodos para devolver si ese mes tiene algunos días de invierno, primavera, verano u otoño, indicando con un booleano el hemisferio (norte o sur, parámetro `enHemisferioNorte`). Es decir: `esDePrimavera(boolean esHemisferioNorte)`, `esDeVerano(boolean esHemisferioNorte)`, `esDeOtoño(boolean esHemisferioNorte)`, `esDeInvierno(boolean esHemisferioNorte)`
 
 ### Respuesta
+``` java
 
 public boolean esDeInvierno(boolean esHemiferioNorte) {
     if (esHemiferioNorte) {
@@ -414,3 +423,4 @@ public boolean esDeOtono(boolean esHemiferioNorte) {
         return this == MARZO || this == ABRIL || this == MAYO;
     }
 }
+```
