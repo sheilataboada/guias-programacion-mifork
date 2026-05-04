@@ -85,7 +85,7 @@ La sobrecarga de métodos consiste en definir varios métodos con el mismo nombr
 ### Respuesta
 
 A continuación se muestra un ejemplo mínimo de una clase en Java llamada Punto, con dos atributos x e y con visibilidad por defecto (sin modificador de acceso). Se define además un método llamado calculaDistanciaAOrigen, que devuelve la distancia del punto a la posición (0,0) utilizando la fórmula matemática correspondiente. Posteriormente se incluye un ejemplo sencillo de uso mediante la creación de una instancia y la llamada al método.
-
+```java
 class Punto {
 
     double x;
@@ -110,6 +110,7 @@ public class Main {
         System.out.println("Distancia al origen: " + distancia);
     }
 }
+```
 En este ejemplo, se crea un objeto p de tipo Punto, se asignan valores a sus atributos y se invoca el método mediante el operador punto. El resultado mostrado será 5.0, ya que corresponde a la distancia del punto (3,4) al origen en el plano cartesiano.
 
 
@@ -143,6 +144,7 @@ La palabra clave new se utiliza en Java para crear un objeto a partir de una cla
 Un constructor es un método especial que se ejecuta automáticamente cuando se crea un objeto mediante new. Su nombre debe coincidir exactamente con el nombre de la clase y no tiene tipo de retorno, ni siquiera void. El constructor se utiliza para inicializar los atributos del objeto en el momento de su creación, asegurando que comience en un estado válido.
 
 A continuación se muestra un ejemplo de una clase Empleado con un constructor que inicializa los atributos dni, nombre y apellidos:
+```java
 
 class Empleado {
 
@@ -156,6 +158,7 @@ class Empleado {
         this.apellidos = apellidos;
     }
 }
+```
 
 En este ejemplo, el constructor recibe tres parámetros y asigna sus valores a los atributos del objeto utilizando this, que permite distinguir los atributos de la clase de los parámetros con el mismo nombre. Al crear un objeto con new Empleado("12345678A", "Ana", "López"), el constructor se ejecuta automáticamente e inicializa el estado del nuevo objeto.
 
