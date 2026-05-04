@@ -169,7 +169,7 @@ La referencia this en Java se utiliza para hacer referencia al objeto actual, es
 No todos los lenguajes utilizan exactamente la misma palabra clave, aunque el concepto suele existir en la mayoría de lenguajes orientados a objetos. En Java y C++ se emplea this, mientras que en otros lenguajes como Python se utiliza self. Aunque el nombre cambie, la idea es la misma: representar al objeto actual dentro de su propia definición.
 
 A continuación se muestra un ejemplo de uso de this en la clase Punto:
-
+```java
 class Punto {
 
     double x;
@@ -184,7 +184,7 @@ class Punto {
         return Math.sqrt(this.x * this.x + this.y * this.y);
     }
 }
-
+```
 En el constructor, this.x y this.y permiten diferenciar los atributos del objeto de los parámetros recibidos. Aunque en el método no sería estrictamente obligatorio escribir this.x, su uso hace explícito que se está accediendo al estado del propio objeto.
 
 
@@ -200,6 +200,7 @@ El método recibirá como parámetro otro objeto Punto y utilizará sus atributo
 
 A continuación se muestra la clase Punto con el nuevo método añadido:
 
+``` java
 class Punto {
 
     double x;
@@ -220,7 +221,7 @@ class Punto {
         return Math.sqrt(diferenciaX * diferenciaX + diferenciaY * diferenciaY);
     }
 }
-
+``` 
 Con este método, si se tienen dos objetos p1 y p2, se puede calcular la distancia entre ellos mediante p1.distanciaA(p2). El cálculo se realiza utilizando los valores almacenados en ambos objetos, demostrando cómo los métodos pueden trabajar con otros objetos como parámetros.
 
 
@@ -247,6 +248,7 @@ Este concepto también existe en otros lenguajes orientados a objetos, aunque pu
 
 A continuación se muestra un ejemplo de redefinición de toString() en la clase Punto:
 
+``` java
 class Punto {
 
     double x;
@@ -261,7 +263,7 @@ class Punto {
         return "Punto(" + x + ", " + y + ")";
     }
 }
-
+```
 Con esta redefinición, si se ejecuta System.out.println(p); donde p es un objeto Punto, se mostrará algo como Punto(3.0, 4.0) en lugar del formato por defecto menos informativo.
 
 
@@ -285,6 +287,7 @@ La clase Punto de Java se podría “emular” en C utilizando un struct para re
 
 Un ejemplo en C podría ser el siguiente:
 
+``` c
 #include <stdio.h>
 #include <math.h>
 
@@ -296,7 +299,7 @@ struct Punto {
 double calculaDistanciaAOrigen(struct Punto p) {
     return sqrt(p.x * p.x + p.y * p.y);
 }
-
+```
 En este caso, la función calculaDistanciaAOrigen recibe una copia del struct Punto y utiliza sus campos para realizar el cálculo. No existe ningún método dentro del struct, ya que en C los tipos de datos no contienen funciones asociadas directamente.
 
 Respecto a this, en C no existe un mecanismo automático equivalente. En Java, this representa el objeto actual que está ejecutando el método. En C, ese papel lo cumple explícitamente el parámetro que se pasa a la función. Es decir, el objeto que en Java estaría implícito como this, en C debe pasarse manualmente como argumento a la función.
