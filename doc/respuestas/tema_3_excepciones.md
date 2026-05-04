@@ -8,6 +8,7 @@ En C no existen excepciones como mecanismo estructurado de gestión de errores, 
 
 Una primera opción consiste en utilizar un valor especial de retorno que indique error. Por ejemplo, se puede devolver un número imposible en condiciones normales (como -1.0 si se asume que la raíz cuadrada válida siempre será no negativa) o utilizar NAN (Not a Number) de la biblioteca matemática. El código podría ser:
 
+``` c
 #include <stdio.h>
 #include <math.h>
 
@@ -29,8 +30,9 @@ int main() {
 
     return 0;
 }
-
+```
 Una segunda opción consiste en devolver un indicador de estado separado del resultado, por ejemplo mediante un parámetro adicional pasado por referencia (puntero). De esta forma, la función no solo calcula el valor, sino que informa explícitamente si la operación fue correcta. Esto separa el resultado del estado del error y suele considerarse un diseño más claro:
+``` c
 
 #include <stdio.h>
 #include <math.h>
@@ -55,7 +57,7 @@ int main() {
 
     return 0;
 }
-
+```
 
 En conclusión, en C el control de errores debe diseñarse manualmente, bien utilizando valores especiales de retorno o bien separando resultado y estado mediante parámetros adicionales. Ambas soluciones permiten informar al usuario desde fuera de la función, aunque la segunda ofrece una separación más clara entre dato calculado y señal de error.
 
@@ -78,6 +80,7 @@ Cuando se llama a una función que puede producir excepciones, el programador de
 En Java, el control de errores puede realizarse mediante excepciones, lo que permite separar claramente el cálculo del tratamiento del error. Si se reescribe el ejemplo de la raíz cuadrada, se puede crear una clase Calculadora que contenga un método raiz. Si el número recibido es negativo, el método puede lanzar una excepción para indicar que la operación no es válida. De este modo, la función no devuelve valores ambiguos, sino que comunica el error de forma explícita.
 
 Desde el método main, que se encuentra fuera de la clase Calculadora, se puede controlar el error utilizando un bloque try-catch. Así se demuestra cómo la excepción lanzada dentro del método es capturada externamente, permitiendo mostrar un mensaje adecuado al usuario sin que el programa termine de forma abrupta. Este diseño es más estructurado que en C y encaja con el modelo orientado a objetos.
+``` java
 
 class Calculadora {
 
@@ -103,7 +106,7 @@ public class Main {
         }
     }
 }
-
+```
 ## 4. ¿Qué es **"lanzar"** una excepción? ¿Qué es **"controlar"** o **"capturar"** una excepción? ¿Qué es que se **"propague"** una excepción? ¿Qué le va ocurriendo a las funciones en la pila de llamadas por donde se va propagando la excepción? ¿Las funciones que no la controlan se reanudan después de alguna forma? Explica con el mismo ejemplo anterior en Java de la raíz cuadrada.
 
 ### Respuesta
@@ -115,6 +118,7 @@ Controlar o capturar una excepción significa interceptarla mediante un bloque t
 Durante la propagación, los métodos por los que pasa la excepción finalizan su ejecución sin completar normalmente su código. Es decir, no continúan después de la llamada que produjo el error, sino que se “deshace” la pila de llamadas hasta llegar al punto donde se captura. Las funciones que no la controlan no se reanudan automáticamente en el punto donde estaban; simplemente terminan y el flujo continúa en el bloque catch que la gestiona.
 
 Usando el ejemplo anterior de la raíz cuadrada, si el método raiz lanza una excepción al recibir un número negativo, el control pasa inmediatamente al catch del main, siempre que allí se haya incluido:
+``` java
 
 class Calculadora {
 
@@ -142,7 +146,7 @@ public class Main {
         System.out.println("El programa continua despues del bloque try-catch");
     }
 }
-
+```
 En este caso, al ejecutarse throw, el método raiz termina inmediatamente y no devuelve ningún valor. La excepción se propaga hasta main, donde es capturada en el bloque catch. Tras ejecutarse ese bloque, el programa continúa normalmente con las instrucciones posteriores al try-catch.
 
 
@@ -199,6 +203,8 @@ Si se utiliza junto con catch, el bloque finally se ejecuta después de que se h
 
 Ejemplo con catch:
 
+```java
+
 try {
     int resultado = 10 / 0;  // provoca ArithmeticException
 } catch (ArithmeticException e) {
@@ -207,8 +213,16 @@ try {
     System.out.println("Este bloque se ejecuta siempre");
 }
 
+```
 Ejemplo sin catch:
+```java
 
+try {
+    int resultado = 10 / 0;  // provoca ArithmeticException
+} finally {
+    System.out.println("Este bloque se ejecuta siempre, antes de propagarse la excepcion");
+}
+```
 En el segundo caso, aunque no se capture la excepción, el bloque finally se ejecuta antes de que el error continúe propagándose. De este modo, se garantiza que el código crítico de limpieza se ejecute en cualquier circunstancia.
 
 
@@ -222,6 +236,7 @@ El bloque finally se ejecuta siempre, tanto si ocurre una excepción como si no 
 
 Incluso si dentro del try aparece un return, el bloque finally también se ejecuta antes de que el método termine realmente. Es decir, el valor de retorno se prepara, pero antes de salir del método se ejecuta el finally. Por ejemplo:
 
+```java
 public static int ejemplo() {
     try {
         return 5;
@@ -229,7 +244,7 @@ public static int ejemplo() {
         System.out.println("Se ejecuta el finally antes de salir del metodo");
     }
 }
-
+```
 En este caso, el método devuelve 5, pero antes de finalizar se ejecuta el código del finally. Esto demuestra que finally está diseñado para garantizar la ejecución de código crítico independientemente de cómo termine el bloque try.
 
 
@@ -265,12 +280,14 @@ En Java, throws se utiliza en la cabecera de un método para indicar que dicho m
 Se considera una alternativa a capturar la excepción porque permite delegar la responsabilidad de gestionarla en un nivel superior. En vez de resolver el problema en el propio método, se deja que otro método con más contexto decida cómo actuar. Esto es útil cuando el método no dispone de información suficiente para tratar el error adecuadamente o cuando se desea centralizar el tratamiento en un punto concreto del programa.
 
 Por ejemplo, si un método abre un fichero y puede producir una IOException, puede declararse así:
+```java
 
 import java.io.IOException;
 
 public void leerDatos() throws IOException {
     // código que puede producir IOException
 }
+```
 
 En este caso, quien llame a leerDatos() estará obligado a capturar la excepción o a volver a declararla con throws. Así, throws no elimina la excepción, sino que la propaga de forma explícita, manteniendo el control estructurado que caracteriza a las excepciones controladas en Java.
 
@@ -283,6 +300,7 @@ Cuando un método abre un fichero, puede producirse una excepción controlada co
 No obstante, aunque se decida no capturar la excepción, puede ser necesario ejecutar código de limpieza. Para ello se utiliza el bloque finally, que se ejecuta siempre, tanto si ocurre la excepción como si no. Esto resulta útil, por ejemplo, para cerrar recursos abiertos o mostrar mensajes de control, antes de que la excepción continúe propagándose.
 
 Un ejemplo simplificado podría ser el siguiente:
+```java
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -304,6 +322,7 @@ public class Lector {
         }
     }
 }
+```
 
 En este caso, el método declara throws IOException, por lo que no captura la posible excepción si el fichero no existe. Sin embargo, el bloque finally se ejecuta siempre antes de que la excepción se propague hacia el método llamador, garantizando así la ejecución del código necesario de cierre o control.
 
@@ -339,6 +358,7 @@ Sí tiene sentido lanzar excepciones dentro de un bloque catch. Cuando se captur
 También es posible relanzar la misma excepción capturada utilizando simplemente throw e;. En este caso, no se crea una nueva excepción, sino que se deja que la original continúe su propagación por la pila de llamadas. Esto tiene sentido cuando se quiere realizar alguna acción local (como registrar el error o liberar recursos) pero sin asumir la responsabilidad de gestionarlo completamente.
 
 Ejemplo de lanzar una nueva excepción desde el catch:
+```java
 
 try {
     int resultado = Integer.parseInt("abc");
@@ -355,6 +375,7 @@ try {
     throw e;  // se relanza la misma excepcion
 }
 
+```
 En el primer caso se transforma la excepción original en otra más adecuada al contexto. En el segundo caso se permite que la excepción siga su curso después de realizar una acción intermedia, lo que resulta útil cuando la gestión definitiva corresponde a un nivel superior del programa.
 
 ## 17. ¿En qué consiste que una excepción sea la **"causa"** de otra excepción? Pon un ejemplo en Java, donde capturemos una excepción de bajo nivel y la encapsulemos en otra personalizada de alto nivel. Cuando una excepción sale por pantalla y tiene una causa, ¿se ve?
@@ -366,6 +387,7 @@ Que una excepción sea la causa de otra significa que una excepción original (n
 Este enfoque es útil cuando no se desea exponer detalles internos (como errores de acceso a fichero o base de datos) al resto del sistema, pero sí mantener esa información para diagnóstico. Así, se captura la excepción de bajo nivel, se crea una excepción personalizada más representativa del problema general y se establece la original como su causa. De esta forma se respeta la encapsulación y se mantiene la trazabilidad del error.
 
 Ejemplo en Java:
+```java
 
 class ErrorAccesoDatos extends Exception {
 
@@ -388,5 +410,5 @@ public class Servicio {
         new Servicio().procesar();
     }
 }
-
+```
 Cuando una excepción con causa se muestra por pantalla (por ejemplo, si no se captura y se deja que el sistema la imprima), aparece tanto la excepción principal como la causa, normalmente indicada con un mensaje del tipo “Caused by”. Por tanto, sí se ve la excepción original, lo que facilita la depuración al conservar la información completa de la cadena de errores.
